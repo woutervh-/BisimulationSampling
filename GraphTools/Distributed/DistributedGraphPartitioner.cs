@@ -1,4 +1,5 @@
-﻿using GraphTools.Distributed.Messages;
+﻿using GraphTools.Distributed.Machines;
+using GraphTools.Distributed.Messages;
 using GraphTools.Graph;
 using System;
 using System.Collections.Generic;
@@ -7,7 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace GraphTools.Distributed.Machines
+namespace GraphTools.Distributed
 {
     class DistributedGraphPartitioner<TNode, TLabel>
     {

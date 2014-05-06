@@ -1,4 +1,5 @@
-﻿using GraphTools.Distributed.Machines;
+﻿using GraphTools.Distributed;
+using GraphTools.Distributed.Machines;
 using GraphTools.Graph;
 using GraphTools.Helpers;
 using System;
