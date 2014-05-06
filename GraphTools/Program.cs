@@ -196,7 +196,9 @@ namespace GraphTools
 
             //*
             // var experiment = Experiments.DistanceProbabilityMassFunction(graph);
-            var experiment = Experiments.MeasureDistributedPerformance(graph, 8);
+            // var experiment = Experiments.MeasureDistributedPerformance(graph, 8);
+            // var experiment = Experiments.MeasureDistributedVisitTimes(graph, 8);
+            var experiment = Experiments.MeasureDistributedDataShipment(graph, 8);
             Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
             experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
             //*/

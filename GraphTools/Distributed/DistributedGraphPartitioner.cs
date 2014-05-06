@@ -39,6 +39,38 @@ namespace GraphTools.Distributed
         }
 
         /// <summary>
+        /// Number of messages sent across all machines.
+        /// </summary>
+        private int visitTimes = 0;
+
+        /// <summary>
+        /// Gets the number of messages sent across all machines.
+        /// </summary>
+        public int VisitTimes
+        {
+            get
+            {
+                return visitTimes;
+            }
+        }
+
+        /// <summary>
+        /// Total size of all the messages sent.
+        /// </summary>
+        private int dataShipment = 0;
+
+        /// <summary>
+        /// Gets the total size of all the messages sent.
+        /// </summary>
+        public int DataShipment
+        {
+            get
+            {
+                return dataShipment;
+            }
+        }
+
+        /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="m">Number of machines.</param>
@@ -98,6 +130,9 @@ namespace GraphTools.Distributed
                 }
             }
             stopwatch.Stop();
+
+            visitTimes = workers.Sum(worker => worker.VisitTimes);
+            dataShipment = workers.Sum(worker => worker.DataShipment);
 
             return distributedPartition;
         }

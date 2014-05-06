@@ -32,6 +32,28 @@ namespace GraphTools.Distributed.Machines
         private int cumulativeSize = 0;
 
         /// <summary>
+        /// Gets the visit times for this machine (number of messages sent to this machine).
+        /// </summary>
+        public int VisitTimes
+        {
+            get
+            {
+                return messageCount;
+            }
+        }
+
+        /// <summary>
+        /// Gets the data shipment for this machine (total size of messages sent to this machine).
+        /// </summary>
+        public int DataShipment
+        {
+            get
+            {
+                return cumulativeSize;
+            }
+        }
+
+        /// <summary>
         /// Asynchronously send a message to this worker.
         /// </summary>
         /// <param name="message">Message to be sent.</param>
