@@ -1,0 +1,120 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{C3FEF56E-A363-4BDD-AA24-7351F5689F36}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>GraphTools</RootNamespace>
+    <AssemblyName>GraphTools</AssemblyName>
+    <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <PlatformTarget>AnyCPU</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+    <Prefer32Bit>false</Prefer32Bit>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="dotNetRDF">
+      <HintPath>..\packages\dotNetRDF.1.0.3\lib\net40\dotNetRDF.dll</HintPath>
+    </Reference>
+    <Reference Include="HtmlAgilityPack">
+      <HintPath>..\packages\HtmlAgilityPack.1.4.6\lib\Net45\HtmlAgilityPack.dll</HintPath>
+    </Reference>
+    <Reference Include="Newtonsoft.Json">
+      <HintPath>..\packages\Newtonsoft.Json.5.0.8\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot, Version=2014.1.249.1, Culture=neutral, PublicKeyToken=638079a8f0bd61e9, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\OxyPlot.WindowsForms.2014.1.249.1\lib\NET45\OxyPlot.dll</HintPath>
+    </Reference>
+    <Reference Include="OxyPlot.WindowsForms, Version=2014.1.249.1, Culture=neutral, PublicKeyToken=245eacd6b5d2d338, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\OxyPlot.WindowsForms.2014.1.249.1\lib\NET45\OxyPlot.WindowsForms.dll</HintPath>
+    </Reference>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+    <Reference Include="VDS.Common">
+      <HintPath>..\packages\VDS.Common.1.2.0\lib\net40-client\VDS.Common.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Distributed\DistributedUtils.cs" />
+    <Compile Include="Distributed\Machines\BisimulationCoordinator.cs" />
+    <Compile Include="Distributed\Machines\BisimulationWorker.cs" />
+    <Compile Include="Distributed\Machines\AbstractMachine.cs" />
+    <Compile Include="Distributed\Machines\DistributedGraphPartitioner.cs" />
+    <Compile Include="Distributed\Messages\AbstractMessage.cs" />
+    <Compile Include="Distributed\Messages\ClearMessage.cs" />
+    <Compile Include="Distributed\Messages\CoordinatorMessage.cs" />
+    <Compile Include="Distributed\Messages\CountMessage.cs" />
+    <Compile Include="Distributed\Messages\DummyMessage.cs" />
+    <Compile Include="Distributed\Messages\CountedMessage.cs" />
+    <Compile Include="Distributed\Messages\RefineMessage.cs" />
+    <Compile Include="Distributed\Messages\SegmentRequestMessage.cs" />
+    <Compile Include="Distributed\Messages\SegmentResponseMessage.cs" />
+    <Compile Include="Distributed\Messages\SharedMessage.cs" />
+    <Compile Include="Distributed\Messages\ShareMessage.cs" />
+    <Compile Include="Distributed\Messages\RefinedMessage.cs" />
+    <Compile Include="Distributed\Messages\UpdatePartitionMessage.cs" />
+    <Compile Include="Dummy.cs" />
+    <Compile Include="Experiments.cs" />
+    <Compile Include="GraphConverter.cs" />
+    <Compile Include="GraphGenerator.cs" />
+    <Compile Include="GraphLoader.cs" />
+    <Compile Include="GraphMetrics.cs" />
+    <Compile Include="GraphPartitioner.cs" />
+    <Compile Include="GraphSampler.cs" />
+    <Compile Include="Graph\MultiDirectedGraph.cs" />
+    <Compile Include="Helpers\Crc32.cs" />
+    <Compile Include="Helpers\Experiment.cs" />
+    <Compile Include="Helpers\Queues.cs" />
+    <Compile Include="Helpers\StaticRandom.cs" />
+    <Compile Include="Helpers\Statistic.cs" />
+    <Compile Include="Helpers\TypeSwitch.cs" />
+    <Compile Include="Helpers\Utils.cs" />
+    <Compile Include="Plot\ErrorLineSeries.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Properties\App.config" />
+    <None Include="Properties\packages.config" />
+  </ItemGroup>
+  <ItemGroup />
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
