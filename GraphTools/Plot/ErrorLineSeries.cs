@@ -60,7 +60,7 @@ namespace GraphTools.Plot
                     0.0,
                     ActualColor,
                     1.0,
-                    LineStyle.Solid,
+                    null, // LineStyle.Solid,
                     OxyPenLineJoin.Miter,
                     true
                 );
@@ -75,7 +75,7 @@ namespace GraphTools.Plot
                     0,
                     ActualColor,
                     1.0,
-                    LineStyle.Solid,
+                    null, // LineStyle.Solid,
                     OxyPenLineJoin.Miter,
                     true
                 );
@@ -90,7 +90,7 @@ namespace GraphTools.Plot
                     0,
                     ActualColor,
                     1.0,
-                    LineStyle.Solid,
+                    null, // LineStyle.Solid,
                     OxyPenLineJoin.Miter,
                     true
                 );

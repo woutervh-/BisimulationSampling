@@ -194,10 +194,11 @@ namespace GraphTools.Helpers
                         MarkerStroke = OxyColors.White,
                         MarkerType = MarkerType.Diamond,
                         Title = Labels[i],
-                        Points = GetStatistics(i).Select((statistic, j) => (IDataPoint)new DataPoint(GetStatistics(HorizontalAxis)[j].Mean, statistic.Mean)).ToList(),
                         ErrorValues = GetStatistics(i).Select(statistic => statistic.StdDev).ToList(),
-                        ErrorWidth = 0.01,
+                        ErrorWidth = 0.1,
                     };
+
+                    mySeries.Points.AddRange(GetStatistics(i).Select((statistic, j) => new DataPoint(GetStatistics(HorizontalAxis)[j].Mean, statistic.Mean)).ToList());
 
                     series.Add(mySeries);
                 }
@@ -208,30 +209,30 @@ namespace GraphTools.Helpers
             {
                 Title = string.Join(", ", Meta),
                 LegendSymbolLength = 16,
-                LegendPlacement = OxyPlot.LegendPlacement.Outside,
-
-                Axes = new Collection<Axis>()
-                {
-                    new LinearAxis()
-                    {
-                        Minimum = yMin,
-                        Maximum = yMax,
-                        Position = AxisPosition.Left,
-                        MajorGridlineStyle = LineStyle.Solid,
-                    },
-
-                    new LinearAxis()
-                    {
-                        Minimum = GetStatistics(HorizontalAxis).Select(statistic => statistic.Min).Min(),
-                        Maximum = GetStatistics(HorizontalAxis).Select(statistic => statistic.Max).Max(),
-                        Position = AxisPosition.Bottom,
-                        MajorGridlineStyle = LineStyle.Solid,
-                        Title = Labels[HorizontalAxis],
-                    }
-                },
-
-                Series = new Collection<Series>(series)
+                LegendPlacement = OxyPlot.LegendPlacement.Outside
             };
+
+            plotModel.Axes.Add(new LinearAxis()
+            {
+                Minimum = yMin,
+                Maximum = yMax,
+                Position = AxisPosition.Left,
+                MajorGridlineStyle = LineStyle.Solid,
+            });
+
+            plotModel.Axes.Add(new LinearAxis()
+            {
+                Minimum = GetStatistics(HorizontalAxis).Select(statistic => statistic.Min).Min(),
+                Maximum = GetStatistics(HorizontalAxis).Select(statistic => statistic.Max).Max(),
+                Position = AxisPosition.Bottom,
+                MajorGridlineStyle = LineStyle.Solid,
+                Title = Labels[HorizontalAxis],
+            });
+
+            foreach (var sery in series)
+            {
+                plotModel.Series.Add(sery);
+            }
 
             return plotModel;
         }
@@ -251,7 +252,7 @@ namespace GraphTools.Helpers
                 {
                     exporter.Width = width;
                 }
-                
+
                 if (!double.IsNaN(height))
                 {
                     exporter.Height = height;

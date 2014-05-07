@@ -14,6 +14,7 @@ namespace GraphTools
 {
     /// <summary>
     /// Main program.
+    /// Serves as a playground for setting up experiments and converting data.
     /// </summary>
     class Program
     {

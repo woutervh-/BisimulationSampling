@@ -69,7 +69,7 @@ namespace GraphTools
             var experiment = new Experiment(3)
             {
                 Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)" },
-                Meta = new string[] { "Performance", "Estimated", graph.Name },
+                Meta = new string[] { "Makespan", "Estimated", graph.Name },
                 F = i =>
                 {
                     int m = Convert.ToInt32(i);
