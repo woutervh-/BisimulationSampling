@@ -172,14 +172,14 @@ namespace GraphTools.Distributed.Machines
 
                             if (changedNodesOfInterest.Any())
                             {
-                                worker.SendMe(new UpdatePartitionMessage<TNode>(this, changedNodesOfInterest));
+                                worker.SendMe(new UpdatePartitionMessage<TNode, int>(this, changedNodesOfInterest, 1));
                             }
                         }
                     }
 
                     shareMessage.Sender.SendMe(new SharedMessage(this));
                 })
-                .Case((UpdatePartitionMessage<TNode> updatePartitionMessage) =>
+                .Case((UpdatePartitionMessage<TNode, int> updatePartitionMessage) =>
                 {
                     foreach (var change in updatePartitionMessage.Changes)
                     {
