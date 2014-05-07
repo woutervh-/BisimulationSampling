@@ -89,9 +89,9 @@ namespace GraphTools.Distributed
         {
             IDictionary<TNode, int> distributedPartition = null;
             var segments = DistributedUtils.ExploreSplit(graph, m);
-            var workers = BisimulationWorker<TNode, TLabel>.CreateWorkers(graph, segments);
-            BisimulationCoordinator<TNode> coordinator = null;
-            coordinator = new BisimulationCoordinator<TNode>((k_max, foundPartition) =>
+            var workers = BisimulationWorker<TNode, TLabel, int>.CreateWorkers<EstimateBisimulationWorker<TNode, TLabel>>(graph, segments);
+            BisimulationCoordinator<TNode, int> coordinator = null;
+            coordinator = new BisimulationCoordinator<TNode, int>((k_max, foundPartition) =>
             {
                 // Console.WriteLine("k_max=" + k_max);
                 distributedPartition = foundPartition;

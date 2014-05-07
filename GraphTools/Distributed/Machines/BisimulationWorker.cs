@@ -9,42 +9,37 @@ using System.Threading.Tasks;
 
 namespace GraphTools.Distributed.Machines
 {
-    class BisimulationWorker<TNode, TLabel> : AbstractMachine
+    abstract class BisimulationWorker<TNode, TLabel, TSignature> : AbstractMachine
     {
         /// <summary>
         /// The graph.
         /// </summary>
-        private MultiDirectedGraph<TNode, TLabel> graph;
+        protected MultiDirectedGraph<TNode, TLabel> Graph;
 
         /// <summary>
         /// Owner function.
         /// </summary>
-        private IDictionary<TNode, BisimulationWorker<TNode, TLabel>> owner;
+        protected IDictionary<TNode, BisimulationWorker<TNode, TLabel, TSignature>> Owner;
 
         /// <summary>
         /// Inverted owner function.
         /// </summary>
-        private IDictionary<BisimulationWorker<TNode, TLabel>, HashSet<TNode>> ownerInverted;
+        protected IDictionary<BisimulationWorker<TNode, TLabel, TSignature>, HashSet<TNode>> OwnerInverted;
 
         /// <summary>
         /// Interested-in function.
         /// </summary>
-        private Dictionary<BisimulationWorker<TNode, TLabel>, HashSet<TNode>> interestedIn;
+        protected Dictionary<BisimulationWorker<TNode, TLabel, TSignature>, HashSet<TNode>> InterestedIn;
 
         /// <summary>
         /// Partition segment.
         /// </summary>
-        private Dictionary<TNode, int> partition;
+        protected Dictionary<TNode, TSignature> Partition;
 
         /// <summary>
         /// Function indicating which nodes have changed block since the previous partition.
         /// </summary>
-        private Dictionary<TNode, bool> changed;
-
-        /// <summary>
-        /// Local Crc32 instance to avoid mutexing.
-        /// </summary>
-        private Crc32 crc32 = new Crc32();
+        protected Dictionary<TNode, bool> Changed;
 
         /// <summary>
         /// 
@@ -52,7 +47,8 @@ namespace GraphTools.Distributed.Machines
         /// <param name="graph"></param>
         /// <param name="partition"></param>
         /// <returns></returns>
-        public static BisimulationWorker<TNode, TLabel>[] CreateWorkers(MultiDirectedGraph<TNode, TLabel> graph, IDictionary<TNode, int> partition)
+        public static BisimulationWorker<TNode, TLabel, TSignature>[] CreateWorkers<TWorker>(MultiDirectedGraph<TNode, TLabel> graph, IDictionary<TNode, int> partition)
+            where TWorker : BisimulationWorker<TNode, TLabel, TSignature>, new()
         {
             var mapping = new Dictionary<int, int>();
             int counter = 0;
@@ -66,13 +62,14 @@ namespace GraphTools.Distributed.Machines
                 }
             }
 
-            var workers = new BisimulationWorker<TNode, TLabel>[counter];
+            var workers = new BisimulationWorker<TNode, TLabel, TSignature>[counter];
             for (int i = 0; i < counter; i++)
             {
-                workers[i] = new BisimulationWorker<TNode, TLabel>(graph);
+                workers[i] = new TWorker();
+                workers[i].setGraph(graph);
             }
 
-            var owner = new Dictionary<TNode, BisimulationWorker<TNode, TLabel>>();
+            var owner = new Dictionary<TNode, BisimulationWorker<TNode, TLabel, TSignature>>();
             foreach (var node in graph.Nodes)
             {
                 owner.Add(node, workers[mapping[partition[node]]]);
@@ -89,47 +86,54 @@ namespace GraphTools.Distributed.Machines
         /// <summary>
         /// Constructor.
         /// </summary>
-        /// <param name="graph"></param>
-        /// <param name="owner"></param>
-        private BisimulationWorker(MultiDirectedGraph<TNode, TLabel> graph)
+        protected BisimulationWorker()
         {
-            this.graph = graph;
+            //
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="graph"></param>
+        private void setGraph(MultiDirectedGraph<TNode, TLabel> graph)
+        {
+            this.Graph = graph;
         }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="owner"></param>
-        private void setOwner(IDictionary<TNode, BisimulationWorker<TNode, TLabel>> owner)
+        private void setOwner(IDictionary<TNode, BisimulationWorker<TNode, TLabel, TSignature>> owner)
         {
-            this.owner = owner;
-            this.ownerInverted = Utils.Invert(owner);
-            this.interestedIn = new Dictionary<BisimulationWorker<TNode, TLabel>, HashSet<TNode>>();
-            this.changed = new Dictionary<TNode, bool>();
+            this.Owner = owner;
+            this.OwnerInverted = Utils.Invert(owner);
+            this.InterestedIn = new Dictionary<BisimulationWorker<TNode, TLabel, TSignature>, HashSet<TNode>>();
+            this.Changed = new Dictionary<TNode, bool>();
 
             // Initialize interested-in function
-            foreach (var worker in ownerInverted.Keys)
+            foreach (var worker in OwnerInverted.Keys)
             {
-                interestedIn.Add(worker, new HashSet<TNode>());
+                InterestedIn.Add(worker, new HashSet<TNode>());
             }
-            foreach (var target in ownerInverted[this])
+            foreach (var target in OwnerInverted[this])
             {
-                foreach (var ei in graph.In(target))
+                foreach (var ei in Graph.In(target))
                 {
-                    var source = graph.Source(ei);
+                    var source = Graph.Source(ei);
 
-                    if (!interestedIn[owner[source]].Contains(target))
+                    if (!InterestedIn[owner[source]].Contains(target))
                     {
-                        interestedIn[owner[source]].Add(target);
+                        InterestedIn[owner[source]].Add(target);
                     }
                 }
             }
-            interestedIn.Remove(this);
+            InterestedIn.Remove(this);
 
             // Initialize changed function
-            foreach (var node in ownerInverted[this])
+            foreach (var node in OwnerInverted[this])
             {
-                changed.Add(node, default(bool));
+                Changed.Add(node, default(bool));
             }
         }
 
@@ -139,145 +143,74 @@ namespace GraphTools.Distributed.Machines
                 .Case((ClearMessage clearMessage) =>
                 {
                     // Reset partition and send sync message
-                    clear();
+                    Clear();
                     clearMessage.Sender.SendMe(new RefinedMessage(this));
                 })
                 .Case((RefineMessage refineMessage) =>
                 {
                     // Perform local refine step
-                    refine();
+                    Refine();
                     refineMessage.Sender.SendMe(new RefinedMessage(this));
                 })
                 .Case((CountMessage countMessage) =>
                 {
-                    var blocks = new HashSet<int>();
-                    foreach (var node in ownerInverted[this])
+                    var blocks = new HashSet<TSignature>();
+                    foreach (var node in OwnerInverted[this])
                     {
-                        if (!blocks.Contains(partition[node]))
+                        if (!blocks.Contains(Partition[node]))
                         {
-                            blocks.Add(partition[node]);
+                            blocks.Add(Partition[node]);
                         }
                     }
 
-                    countMessage.Sender.SendMe(new CountedMessage(this, blocks));
+                    countMessage.Sender.SendMe(new CountedMessage<TSignature>(this, blocks));
                 })
                 .Case((ShareMessage shareMessage) =>
                 {
                     // Share changes
-                    foreach (var worker in ownerInverted.Keys)
+                    foreach (var worker in OwnerInverted.Keys)
                     {
                         if (worker != this)
                         {
-                            var changedNodesOfInterest = partition.Where(kvp => interestedIn[worker].Contains(kvp.Key) && changed[kvp.Key]);
+                            var changedNodesOfInterest = Partition.Where(kvp => InterestedIn[worker].Contains(kvp.Key) && Changed[kvp.Key]);
 
                             if (changedNodesOfInterest.Any())
                             {
-                                worker.SendMe(new UpdatePartitionMessage<TNode, int>(this, changedNodesOfInterest, 1));
+                                worker.SendMe(new UpdatePartitionMessage<TNode, TSignature>(this, changedNodesOfInterest, SignatureSize));
                             }
                         }
                     }
 
                     shareMessage.Sender.SendMe(new SharedMessage(this));
                 })
-                .Case((UpdatePartitionMessage<TNode, int> updatePartitionMessage) =>
+                .Case((UpdatePartitionMessage<TNode, TSignature> updatePartitionMessage) =>
                 {
                     foreach (var change in updatePartitionMessage.Changes)
                     {
-                        partition[change.Key] = change.Value;
+                        Partition[change.Key] = change.Value;
                     }
                 })
                 .Case((SegmentRequestMessage segmentRequestMessage) =>
                 {
-                    segmentRequestMessage.Sender.SendMe(new SegmentResponseMessage<TNode>(this, partition.Where(kvp => owner[kvp.Key] == this)));
+                    segmentRequestMessage.Sender.SendMe(new SegmentResponseMessage<TNode, TSignature>(this, Partition.Where(kvp => Owner[kvp.Key] == this)));
                 });
         }
 
         /// <summary>
-        /// Resets the partition to the base (k = 0) refinement.
+        /// Gets the size of a signature.
         /// </summary>
-        private void clear()
-        {
-            partition = new Dictionary<TNode, int>();
+        /// <param name="signature"></param>
+        /// <returns></returns>
+        protected abstract int SignatureSize(TSignature signature);
 
-            foreach (var node in graph.Nodes)
-            {
-                if (owner[node] == this)
-                {
-                    partition.Add(node, Hash(graph.NodeLabel(node)));
-                    changed[node] = true;
-                }
-                else
-                {
-                    partition.Add(node, default(int));
-                }
-            }
-        }
-
+        /// <summary>
+        /// Resets the partition to k = 0.
+        /// </summary>
+        protected abstract void Clear();
+        
         /// <summary>
         /// Refines the partition by performing a refinement step.
         /// </summary>
-        private void refine()
-        {
-            var newPartition = new Dictionary<TNode, int>();
-
-            foreach (var u in graph.Nodes)
-            {
-                if (owner[u] == this)
-                {
-                    var H = new HashSet<int>();
-                    H.Add(Hash(graph.NodeLabel(u)));
-
-                    // Compute the hashes for pairs (label[u, v], pId_k-1(v))
-                    foreach (var eo in graph.Out(u))
-                    {
-                        var v = graph.Target(eo);
-                        var edgeHash = Hash(graph.EdgeLabel(eo), partition[v]);
-                        if (!H.Contains(edgeHash))
-                        {
-                            H.Add(edgeHash);
-                        }
-                    }
-
-                    // Combine the hashes using some associative-commutative operator
-                    int hash = 0;
-                    foreach (var edgeHash in H)
-                    {
-                        hash += edgeHash;
-                    }
-
-                    // Assign partition block to node
-                    newPartition.Add(u, hash);
-
-                    // Determine if u has changed
-                    changed[u] = partition[u] != hash;
-                }
-                else
-                {
-                    newPartition.Add(u, partition[u]);
-                }
-            }
-
-            partition = newPartition;
-        }
-
-        /// <summary>
-        /// Hashes a list of objects.
-        /// The hash is dependent on the order of the items in the list.
-        /// </summary>
-        /// <param name="list"></param>
-        /// <returns></returns>
-        public int Hash(params object[] list)
-        {
-            byte[] buffer = new byte[4 * list.Length];
-
-            for (int i = 0; i < list.Length; i++)
-            {
-                Array.Copy(BitConverter.GetBytes(list[i].GetHashCode()), 0, buffer, 4 * i, 4);
-            }
-
-            byte[] hash = crc32.ComputeHash(buffer);
-
-            return BitConverter.ToInt32(hash, 0);
-        }
+        protected abstract void Refine();
     }
 }

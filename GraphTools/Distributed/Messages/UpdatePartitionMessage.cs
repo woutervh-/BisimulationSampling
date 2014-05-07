@@ -1,4 +1,5 @@
 ﻿using GraphTools.Distributed.Machines;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -29,7 +30,7 @@ namespace GraphTools.Distributed.Messages
         /// <summary>
         /// Size of a the signature.
         /// </summary>
-        private int signatureSize = 0;
+        private Func<TSignature, int> signatureSize;
 
         /// <summary>
         /// Constructor.
@@ -37,7 +38,7 @@ namespace GraphTools.Distributed.Messages
         /// <param name="from"></param>
         /// <param name="changes"></param>
         /// <param name="signatureSize"></param>
-        public UpdatePartitionMessage(AbstractMachine from, IEnumerable<KeyValuePair<TNode, TSignature>> changes, int signatureSize)
+        public UpdatePartitionMessage(AbstractMachine from, IEnumerable<KeyValuePair<TNode, TSignature>> changes, Func<TSignature, int> signatureSize)
             : base(from)
         {
             this.changes = changes.ToArray();
@@ -48,7 +49,8 @@ namespace GraphTools.Distributed.Messages
         {
             get
             {
-                return (1 + signatureSize) * changes.Count();
+                // Sum of number of nodes and their signature sizes
+                return changes.Sum(kvp => 1 + signatureSize(kvp.Value));
             }
         }
     }

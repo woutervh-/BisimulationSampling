@@ -4,11 +4,11 @@ using System.Linq;
 
 namespace GraphTools.Distributed.Messages
 {
-    class CountedMessage : AbstractMessage
+    class CountedMessage<TSignature> : AbstractMessage
     {
-        private IEnumerable<int> blocks;
+        private IEnumerable<TSignature> blocks;
 
-        public IEnumerable<int> Blocks
+        public IEnumerable<TSignature> Blocks
         {
             get
             {
@@ -21,7 +21,7 @@ namespace GraphTools.Distributed.Messages
         /// </summary>
         /// <param name="from"></param>
         /// <param name="count"></param>
-        public CountedMessage(AbstractMachine from, IEnumerable<int> blocks)
+        public CountedMessage(AbstractMachine from, IEnumerable<TSignature> blocks)
             : base(from)
         {
             this.blocks = blocks.ToArray();

@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace GraphTools.Distributed.Machines
 {
-    class BisimulationCoordinator<TNode> : AbstractMachine
+    class BisimulationCoordinator<TNode, TSignature> : AbstractMachine
     {
         /// <summary>
         /// The workers running the bisimulation.
@@ -21,7 +21,7 @@ namespace GraphTools.Distributed.Machines
         /// <summary>
         /// 
         /// </summary>
-        private Dictionary<TNode, int> partition;
+        private Dictionary<TNode, TSignature> partition;
 
         /// <summary>
         /// 
@@ -31,7 +31,7 @@ namespace GraphTools.Distributed.Machines
         /// <summary>
         /// 
         /// </summary>
-        private HashSet<int> blocks;
+        private HashSet<TSignature> blocks;
 
         /// <summary>
         /// States of workers.
@@ -41,13 +41,13 @@ namespace GraphTools.Distributed.Machines
         /// <summary>
         /// 
         /// </summary>
-        private Action<int, IDictionary<TNode, int>> onComplete;
+        private Action<int, IDictionary<TNode, TSignature>> onComplete;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="onComplete"></param>
-        public BisimulationCoordinator(Action<int, IDictionary<TNode, int>> onComplete)
+        public BisimulationCoordinator(Action<int, IDictionary<TNode, TSignature>> onComplete)
         {
             this.onComplete = onComplete;
         }
@@ -58,9 +58,9 @@ namespace GraphTools.Distributed.Machines
                 .Case((CoordinatorMessage coordinatorMessage) =>
                 {
                     k_max = 0;
-                    partition = new Dictionary<TNode, int>();
+                    partition = new Dictionary<TNode, TSignature>();
                     oldNumBlocks = 0;
-                    blocks = new HashSet<int>();
+                    blocks = new HashSet<TSignature>();
                     workers = coordinatorMessage.Workers;
                     state = new Dictionary<AbstractMachine, WorkerState>();
 
@@ -100,7 +100,7 @@ namespace GraphTools.Distributed.Machines
                         }
                     }
                 })
-                .Case((CountedMessage countedMessage) =>
+                .Case((CountedMessage<TSignature> countedMessage) =>
                 {
                     state[countedMessage.Sender] = WorkerState.Waiting;
                     blocks.UnionWith(countedMessage.Blocks);
@@ -129,7 +129,7 @@ namespace GraphTools.Distributed.Machines
                         }
                     }
                 })
-                .Case((SegmentResponseMessage<TNode> segmentResponseMessage) =>
+                .Case((SegmentResponseMessage<TNode, TSignature> segmentResponseMessage) =>
                 {
                     state[segmentResponseMessage.Sender] = WorkerState.Waiting;
 
