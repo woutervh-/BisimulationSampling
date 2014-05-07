@@ -70,6 +70,7 @@
     <Compile Include="Distributed\Machines\AbstractMachine.cs" />
     <Compile Include="Distributed\DistributedGraphPartitioner.cs" />
     <Compile Include="Distributed\Machines\EstimateBisimulationWorker.cs" />
+    <Compile Include="Distributed\Machines\ExactBisimulationWorker.cs" />
     <Compile Include="Distributed\Messages\AbstractMessage.cs" />
     <Compile Include="Distributed\Messages\ClearMessage.cs" />
     <Compile Include="Distributed\Messages\CoordinatorMessage.cs" />

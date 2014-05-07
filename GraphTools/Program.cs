@@ -72,7 +72,7 @@ namespace GraphTools
             // Load graph and labels
             var graph = GraphLoader.LoadGraphML(path, int.Parse, int.Parse);
 
-            //*
+            /*
             var partitioner = new GraphPartitioner<int, int>(graph);
             var distributedPartitioner = new DistributedGraphPartitioner<int, int>(8, graph);
             //*/
@@ -87,8 +87,8 @@ namespace GraphTools
             Console.ReadLine();
             //*/
 
-            var estim = GraphGenerator.ReducedGraph(graph, distributedPartitioner.EstimateBisimulationReduction);
-            var exact = GraphGenerator.ReducedGraph(graph, partitioner.BisimulationReduction);
+            // var estim = GraphGenerator.ReducedGraph(graph, distributedPartitioner.EstimateBisimulationReduction);
+            // var exact = GraphGenerator.ReducedGraph(graph, partitioner.BisimulationReduction);
 
             //*
             // GraphConverter.SaveToGraphML(estim, Path.GetDirectoryName(path) + @"\" + graph.Name + "_estim.xml");
@@ -96,7 +96,7 @@ namespace GraphTools
             // GraphConverter.SaveToGraphML(coarse, Path.GetDirectoryName(path) + @"\" + graph.Name + "_coarse.xml");
             //*/
 
-            //*
+            /*
             var k_max = partitioner.MultilevelBisimulationReduction().Count - 1;
             var metrics = GraphMetrics.BisimulationEquivalence(estim, exact, k_max);
 
@@ -197,13 +197,14 @@ namespace GraphTools
             int k = Input("Please enter a value for k in k-bisimulation", int.Parse);
             //*/
 
-            /*
+            //*
             // var experiment = Experiments.DistanceProbabilityMassFunction(graph);
             // var experiment = Experiments.MeasureDistributedPerformance(graph, 8);
             // var experiment = Experiments.MeasureDistributedVisitTimes(graph, 8);
             var experiment = Experiments.MeasureDistributedDataShipment(graph, 8);
             Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
             experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
+            var bla = new EstimateBisimulationWorker<int, int>();
             //*/
 
             /* Run bisimulation experiment

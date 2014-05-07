@@ -84,14 +84,6 @@ namespace GraphTools.Distributed.Machines
         }
 
         /// <summary>
-        /// Constructor.
-        /// </summary>
-        protected BisimulationWorker()
-        {
-            //
-        }
-
-        /// <summary>
         /// 
         /// </summary>
         /// <param name="graph"></param>
