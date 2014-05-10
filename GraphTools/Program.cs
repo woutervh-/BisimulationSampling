@@ -204,7 +204,6 @@ namespace GraphTools
             var experiment = Experiments.MeasureDistributedDataShipment(graph, 8);
             Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
             experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
-            var bla = new EstimateBisimulationWorker<int, int>();
             //*/
 
             /* Run bisimulation experiment

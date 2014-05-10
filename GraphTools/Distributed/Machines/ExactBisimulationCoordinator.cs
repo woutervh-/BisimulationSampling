@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace GraphTools.Distributed.Machines
 {
-    class BisimulationCoordinator<TNode, TSignature> : AbstractMachine
+    class ExactBisimulationCoordinator<TNode, TLabel> : AbstractMachine
     {
         /// <summary>
         /// The workers running the bisimulation.
@@ -21,7 +21,7 @@ namespace GraphTools.Distributed.Machines
         /// <summary>
         /// 
         /// </summary>
-        private Dictionary<TNode, TSignature> partition;
+        private Dictionary<TNode, int> partition;
 
         /// <summary>
         /// 
@@ -31,7 +31,7 @@ namespace GraphTools.Distributed.Machines
         /// <summary>
         /// 
         /// </summary>
-        private HashSet<TSignature> blocks;
+        private HashSet<int> blocks;
 
         /// <summary>
         /// States of workers.
@@ -41,13 +41,23 @@ namespace GraphTools.Distributed.Machines
         /// <summary>
         /// 
         /// </summary>
-        private Action<int, IDictionary<TNode, TSignature>> onComplete;
+        private Action<int, IDictionary<TNode, int>> onComplete;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private Dictionary<Tuple<TLabel, HashSet<Tuple<TLabel, int>>>, int> signatures;
+
+        /// <summary>
+        /// 
+        /// </summary>
+        private int counter;
 
         /// <summary>
         /// Constructor.
         /// </summary>
         /// <param name="onComplete"></param>
-        public BisimulationCoordinator(Action<int, IDictionary<TNode, TSignature>> onComplete)
+        public ExactBisimulationCoordinator(Action<int, IDictionary<TNode, int>> onComplete)
         {
             this.onComplete = onComplete;
         }
@@ -58,11 +68,17 @@ namespace GraphTools.Distributed.Machines
                 .Case((CoordinatorMessage coordinatorMessage) =>
                 {
                     k_max = 0;
-                    partition = new Dictionary<TNode, TSignature>();
+                    partition = new Dictionary<TNode, int>();
                     oldNumBlocks = 0;
-                    blocks = new HashSet<TSignature>();
+                    blocks = new HashSet<int>();
                     workers = coordinatorMessage.Workers;
                     state = new Dictionary<AbstractMachine, WorkerState>();
+
+                    var comparer1 = EqualityComparer<TLabel>.Default;
+                    var comparer2 = new Utils.HashSetEqualityComparer<Tuple<TLabel, int>>();
+                    var comparer = new Utils.PairEqualityComparer<TLabel, HashSet<Tuple<TLabel, int>>>(comparer1, comparer2);
+                    signatures = new Dictionary<Tuple<TLabel, HashSet<Tuple<TLabel, int>>>, int>(comparer);
+                    counter = 0;
 
                     foreach (var worker in workers)
                     {
@@ -70,7 +86,7 @@ namespace GraphTools.Distributed.Machines
                         worker.SendMe(new ClearMessage(this));
                     }
                 })
-                .Case((RefinedMessage refinedMessage) =>
+                .Case((ExactRefinedMessage refinedMessage) =>
                 {
                     state[refinedMessage.Sender] = WorkerState.Waiting;
 
@@ -100,7 +116,7 @@ namespace GraphTools.Distributed.Machines
                         }
                     }
                 })
-                .Case((CountedMessage<TSignature> countedMessage) =>
+                .Case((CountedMessage countedMessage) =>
                 {
                     state[countedMessage.Sender] = WorkerState.Waiting;
                     blocks.UnionWith(countedMessage.Blocks);
@@ -129,7 +145,7 @@ namespace GraphTools.Distributed.Machines
                         }
                     }
                 })
-                .Case((SegmentResponseMessage<TNode, TSignature> segmentResponseMessage) =>
+                .Case((SegmentResponseMessage<TNode> segmentResponseMessage) =>
                 {
                     state[segmentResponseMessage.Sender] = WorkerState.Waiting;
 

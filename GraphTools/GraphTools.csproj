@@ -65,11 +65,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Distributed\DistributedUtils.cs" />
-    <Compile Include="Distributed\Machines\BisimulationCoordinator.cs" />
-    <Compile Include="Distributed\Machines\BisimulationWorker.cs" />
+    <Compile Include="Distributed\Machines\EstimateBisimulationCoordinator.cs" />
+    <Compile Include="Distributed\Machines\EstimateBisimulationWorker.cs" />
     <Compile Include="Distributed\Machines\AbstractMachine.cs" />
     <Compile Include="Distributed\DistributedGraphPartitioner.cs" />
-    <Compile Include="Distributed\Machines\EstimateBisimulationWorker.cs" />
+    <Compile Include="Distributed\Machines\ExactBisimulationCoordinator.cs" />
     <Compile Include="Distributed\Machines\ExactBisimulationWorker.cs" />
     <Compile Include="Distributed\Messages\AbstractMessage.cs" />
     <Compile Include="Distributed\Messages\ClearMessage.cs" />
@@ -77,12 +77,14 @@
     <Compile Include="Distributed\Messages\CountMessage.cs" />
     <Compile Include="Distributed\Messages\DummyMessage.cs" />
     <Compile Include="Distributed\Messages\CountedMessage.cs" />
+    <Compile Include="Distributed\Messages\ExactRefinedMessage.cs" />
+    <Compile Include="Distributed\Messages\MapUpdateMessage.cs" />
     <Compile Include="Distributed\Messages\RefineMessage.cs" />
     <Compile Include="Distributed\Messages\SegmentRequestMessage.cs" />
     <Compile Include="Distributed\Messages\SegmentResponseMessage.cs" />
     <Compile Include="Distributed\Messages\SharedMessage.cs" />
     <Compile Include="Distributed\Messages\ShareMessage.cs" />
-    <Compile Include="Distributed\Messages\RefinedMessage.cs" />
+    <Compile Include="Distributed\Messages\EstimateRefinedMessage.cs" />
     <Compile Include="Distributed\Messages\UpdatePartitionMessage.cs" />
     <Compile Include="Dummy.cs" />
     <Compile Include="Experiments.cs" />

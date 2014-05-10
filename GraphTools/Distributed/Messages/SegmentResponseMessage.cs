@@ -8,17 +8,17 @@ namespace GraphTools.Distributed.Messages
     /// A message containing the local partition of a worker machine.
     /// </summary>
     /// <typeparam name="TNode"></typeparam>
-    class SegmentResponseMessage<TNode, TSignature> : AbstractMessage
+    class SegmentResponseMessage<TNode> : AbstractMessage
     {
         /// <summary>
         /// The local partition pairs of the worker (sender).
         /// </summary>
-        private IEnumerable<KeyValuePair<TNode, TSignature>> pairs;
+        private IEnumerable<KeyValuePair<TNode, int>> pairs;
 
         /// <summary>
         /// Gets the local partition pairs of the worker (sender).
         /// </summary>
-        public IEnumerable<KeyValuePair<TNode, TSignature>> Pairs
+        public IEnumerable<KeyValuePair<TNode, int>> Pairs
         {
             get
             {
@@ -31,7 +31,7 @@ namespace GraphTools.Distributed.Messages
         /// </summary>
         /// <param name="from"></param>
         /// <param name="pairs"></param>
-        public SegmentResponseMessage(AbstractMachine from, IEnumerable<KeyValuePair<TNode, TSignature>> pairs)
+        public SegmentResponseMessage(AbstractMachine from, IEnumerable<KeyValuePair<TNode, int>> pairs)
             : base(from)
         {
             this.pairs = pairs.ToArray();

@@ -161,6 +161,36 @@ namespace GraphTools.Helpers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <typeparam name="T1"></typeparam>
+        /// <typeparam name="T2"></typeparam>
+        public class PairEqualityComparer<T1, T2> : IEqualityComparer<Tuple<T1, T2>>
+        {
+            private IEqualityComparer<T1> comparer1;
+            private IEqualityComparer<T2> comparer2;
+
+            public PairEqualityComparer(IEqualityComparer<T1> comparer1, IEqualityComparer<T2> comparer2)
+            {
+                this.comparer1 = comparer1;
+                this.comparer2 = comparer2;
+            }
+
+            public bool Equals(Tuple<T1, T2> x, Tuple<T1, T2> y)
+            {
+                return comparer1.Equals(x.Item1, y.Item1) && comparer2.Equals(x.Item2, y.Item2);
+            }
+
+            public int GetHashCode(Tuple<T1, T2> obj)
+            {
+                int hash = 1;
+                hash = hash * 17 + obj.Item1.GetHashCode();
+                hash = hash * 31 + obj.Item2.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <summary>
         /// Returns the element in the sequence which has the lowest key value.
         /// </summary>
         /// <typeparam name="TSource"></typeparam>

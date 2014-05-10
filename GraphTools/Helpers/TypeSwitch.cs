@@ -13,7 +13,7 @@ namespace GraphTools.Helpers
         /// <typeparam name="TSource"></typeparam>
         /// <param name="source"></param>
         /// <returns></returns>
-        public static Switch<TSource> On<TSource>(this TSource source)
+        public static Switch<TSource> On<TSource>(TSource source)
         {
             return new Switch<TSource>(source);
         }

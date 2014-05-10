@@ -1,11 +1,9 @@
 ﻿using GraphTools.Distributed.Machines;
 using GraphTools.Distributed.Messages;
 using GraphTools.Graph;
-using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace GraphTools.Distributed
@@ -89,9 +87,9 @@ namespace GraphTools.Distributed
         {
             IDictionary<TNode, int> distributedPartition = null;
             var segments = DistributedUtils.ExploreSplit(graph, m);
-            var workers = BisimulationWorker<TNode, TLabel, int>.CreateWorkers<EstimateBisimulationWorker<TNode, TLabel>>(graph, segments);
-            BisimulationCoordinator<TNode, int> coordinator = null;
-            coordinator = new BisimulationCoordinator<TNode, int>((k_max, foundPartition) =>
+            var workers = EstimateBisimulationWorker<TNode, TLabel>.CreateWorkers(graph, segments);
+            EstimateBisimulationCoordinator<TNode> coordinator = null;
+            coordinator = new EstimateBisimulationCoordinator<TNode>((k_max, foundPartition) =>
             {
                 // Console.WriteLine("k_max=" + k_max);
                 distributedPartition = foundPartition;
