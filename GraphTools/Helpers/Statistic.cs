@@ -1,31 +1,83 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace GraphTools.Helpers
 {
     /// <summary>
-    /// Used to compute statistics of a sample set.
-    /// The statistics are computed incrementally.
-    /// All methods and accessors in this class are thread-safe.
+    /// Used to compute statistics of a set of numbers.
     /// </summary>
     class Statistic
     {
-        private double min = double.PositiveInfinity;
-        private double max = double.NegativeInfinity;
-        private int count = 0;
-        private double mean = 0.0;
-        private double variance = 0.0;
-
-        public double Min { get { lock (@lock) { return min; } } }
-        public double Max { get { lock (@lock) { return max; } } }
-        public int Count { get { lock (@lock) { return count; } } }
-        public double Mean { get { lock (@lock) { return mean; } } }
-        public double Variance { get { lock (@lock) { return variance; } } }
-        public double StdDev { get { lock (@lock) { return Math.Sqrt(variance); } } }
+        private List<double> items = new List<double>();
 
         /// <summary>
-        /// Mutex lock for thread-safety.
+        /// Gets the minimum value of the set of numbers.
         /// </summary>
-        private object @lock = new object();
+        public double Min
+        {
+            get
+            {
+                return items.Min();
+            }
+        }
+
+        /// <summary>
+        /// Gets the maximum value of the set of numbers.
+        /// </summary>
+        public double Max
+        {
+            get
+            {
+                return items.Max();
+            }
+        }
+
+        /// <summary>
+        /// Gets the size of the set of numbers.
+        /// </summary>
+        public int Count
+        {
+            get
+            {
+                return items.Count;
+            }
+        }
+
+        /// <summary>
+        /// Gets the average (mean) value of the set of numbers.
+        /// </summary>
+        public double Mean
+        {
+            get
+            {
+                return items.Average();
+            }
+        }
+
+        /// <summary>
+        /// Gets the variance of the set of numbers.
+        /// </summary>
+        public double Variance
+        {
+            get
+            {
+                double mean = Mean;
+                double sumSquares = items.Sum(item => (item - mean) * (item - mean));
+                return sumSquares / Count;
+            }
+        }
+
+        /// <summary>
+        /// Gets the standard deviation of the set of numbers.
+        /// </summary>
+        public double StdDev
+        {
+            get
+            {
+                return Math.Sqrt(Variance);
+            }
+        }
 
         /// <summary>
         /// Update the statistics with a new value.
@@ -33,20 +85,7 @@ namespace GraphTools.Helpers
         /// <param name="s"></param>
         public void Update(double s)
         {
-            lock (@lock)
-            {
-                count += 1;
-                min = Math.Min(min, s);
-                max = Math.Max(max, s);
-
-                double delta = s - mean;
-                mean += delta / count;
-
-                if (count > 1)
-                {
-                    variance += (delta * (s - mean) - variance) / (count - 1);
-                }
-            }
+            items.Add(s);
         }
 
         /// <summary>
@@ -55,10 +94,7 @@ namespace GraphTools.Helpers
         /// <returns></returns>
         public override string ToString()
         {
-            lock (@lock)
-            {
-                return "Min = " + Min + ", Max = " + Max + ", N = " + Count + ", u = " + Mean + ", V = " + Variance;
-            }
+            return "Min = " + Min + ", Max = " + Max + ", N = " + Count + ", u = " + Mean + ", V = " + Variance;
         }
     }
 }

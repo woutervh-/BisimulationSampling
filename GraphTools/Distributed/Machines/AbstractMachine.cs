@@ -100,7 +100,7 @@ namespace GraphTools.Distributed.Machines
                 }
 
                 running = false;
-                SendMe(new DummyMessage(this));
+                SendMe(new StopMessage(this));
                 // Console.WriteLine("Stopping machine " + this);
             }
         }

@@ -87,7 +87,7 @@ namespace GraphTools
             Console.ReadLine();
             //*/
 
-            //*
+            /*
             var estim = GraphGenerator.ReducedGraph(graph, distributedPartitioner.ExactBisimulationReduction);
             var exact = GraphGenerator.ReducedGraph(graph, partitioner.EstimateBisimulationReduction);
             //*/
@@ -98,7 +98,7 @@ namespace GraphTools
             // GraphConverter.SaveToGraphML(coarse, Path.GetDirectoryName(path) + @"\" + graph.Name + "_coarse.xml");
             //*/
 
-            //*
+            /*
             var k_max = partitioner.MultilevelExactBisimulationReduction().Count - 1;
             var metrics = GraphMetrics.BisimulationEquivalence(estim, exact, k_max);
 
@@ -199,13 +199,19 @@ namespace GraphTools
             int k = Input("Please enter a value for k in k-bisimulation", int.Parse);
             //*/
 
-            //*
-            // var experiment = Experiments.DistanceProbabilityMassFunction(graph);
-            // var experiment = Experiments.MeasureDistributedPerformance(graph, 8);
-            // var experiment = Experiments.MeasureDistributedVisitTimes(graph, 8);
-            var experiment = Experiments.MeasureDistributedDataShipmentExact(graph, 8);
+            /*
+            var experiment = Experiments.DistanceProbabilityMassFunction(graph);
             Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
             experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
+            //*/
+
+            //*
+            var experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, 8);
+            foreach (var experiment in experiments)
+            {
+                Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
+                experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
+            }
             //*/
 
             /* Run bisimulation experiment

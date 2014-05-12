@@ -63,6 +63,42 @@ namespace GraphTools.Helpers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="columnSets"></param>
+        /// <returns></returns>
+        public Experiment[] Split(IEnumerable<IEnumerable<int>> columnSets)
+        {
+            var experiments = new Experiment[columnSets.Count()];
+
+            int i = 0;
+            foreach (var columnSet in columnSets)
+            {
+                var experiment = new Experiment(columnSet.Count());
+                var newResults = new List<List<Statistic>>();
+
+                foreach (int index in columnSet)
+                {
+                    newResults.Add(results[index]);
+                }
+
+                experiment.setResults(newResults);
+                experiments[i++] = experiment;
+            }
+
+            return experiments;
+        }
+
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="results"></param>
+        private void setResults(List<List<Statistic>> results)
+        {
+            this.results = results;
+        }
+
+        /// <summary>
         /// Run experiment.
         /// </summary>
         /// <param name="from">Horizontal axis variable lower bound (inclusive).</param>
@@ -292,47 +328,5 @@ namespace GraphTools.Helpers
 
             File.WriteAllLines(path, lines);
         }
-
-        /*
-        /// <summary>
-        /// Save results to file in TSV format.
-        /// </summary>
-        /// <param name="path"></param>
-        public void Save(string path)
-        {
-            if (results == null)
-            {
-                throw new InvalidOperationException("Experiment has not been run yet.");
-            }
-
-            string content = Meta.Length > 0 ? (string.Join(Environment.NewLine, Meta.Select(meta => "# " + meta)) + Environment.NewLine) : string.Empty;
-            content += XLabel + "\t";
-            foreach (var YLabel in YLabels)
-            {
-                // content += YLabel + " (" + results.First().Value[0].Count + " runs)\t\t";
-                content += YLabel + "\t\t";
-            }
-            content += Environment.NewLine;
-            foreach (var YLabel in YLabels)
-            {
-                content += "\tAverage\tSD";
-            }
-            content += Environment.NewLine;
-
-            foreach (var kvp in results.OrderBy(kvp => kvp.Key))
-            {
-                var statistics = kvp.Value;
-                content += kvp.Key;
-                foreach (var statistic in statistics)
-                {
-                    content += "\t" + statistic.Mean + "\t" + statistic.StdDev;
-                }
-                content += Environment.NewLine;
-            }
-
-            Directory.CreateDirectory(Path.GetDirectoryName(path));
-            File.WriteAllText(path, content);
-        }
-        //*/
     }
 }

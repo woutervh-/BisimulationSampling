@@ -75,7 +75,7 @@
     <Compile Include="Distributed\Messages\ClearMessage.cs" />
     <Compile Include="Distributed\Messages\CoordinatorMessage.cs" />
     <Compile Include="Distributed\Messages\CountMessage.cs" />
-    <Compile Include="Distributed\Messages\DummyMessage.cs" />
+    <Compile Include="Distributed\Messages\StopMessage.cs" />
     <Compile Include="Distributed\Messages\CountedMessage.cs" />
     <Compile Include="Distributed\Messages\ExactRefinedMessage.cs" />
     <Compile Include="Distributed\Messages\RefineMessage.cs" />

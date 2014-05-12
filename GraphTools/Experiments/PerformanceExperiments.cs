@@ -13,9 +13,9 @@ namespace GraphTools
         /// <typeparam name="TNode"></typeparam>
         /// <typeparam name="TLabel"></typeparam>
         /// <param name="graph"></param>
-        /// <param name="M">Maximum number of machines (at least 1).</param>
+        /// <param name="M"></param>
         /// <returns></returns>
-        public static Experiment MeasureDistributedMakespanEstimate<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
+        public static Experiment[] MeasureDistributedPerformanceEstimate<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
         {
             var sequentialPartitioner = new GraphPartitioner<TNode, TLabel>(graph);
             var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
@@ -25,10 +25,10 @@ namespace GraphTools
                 distributedPartitioner[i] = new DistributedGraphPartitioner<TNode, TLabel>(i + 1, graph);
             }
 
-            var experiment = new Experiment(3)
+            var experiment = new Experiment(5)
             {
-                Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)" },
-                Meta = new string[] { "Makespan", "Estimated", graph.Name },
+                Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)", "Visit times", "Data shipment" },
+                Meta = new string[] { "Performance", "Estimated", graph.Name },
                 F = i =>
                 {
                     int m = Convert.ToInt32(i);
@@ -36,83 +36,33 @@ namespace GraphTools
                     var sequentialTime = sequentialPartitioner.ElapsedMilliseconds;
                     distributedPartitioner[m].EstimateBisimulationReduction();
                     var distributedTime = distributedPartitioner[m].ElapsedMilliseconds;
-
-                    return new double[] { m + 1, sequentialTime, distributedTime };
-                },
-            };
-
-            experiment.Run(0, M - 1, 1, 10);
-            return experiment;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TNode"></typeparam>
-        /// <typeparam name="TLabel"></typeparam>
-        /// <param name="graph"></param>
-        /// <param name="M"></param>
-        /// <returns></returns>
-        public static Experiment MeasureDistributedVisitTimesEstimate<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
-        {
-            var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
-
-            for (int i = 0; i < M; i++)
-            {
-                distributedPartitioner[i] = new DistributedGraphPartitioner<TNode, TLabel>(i + 1, graph);
-            }
-
-            var experiment = new Experiment(2)
-            {
-                Labels = new string[] { "Number of machines", "Visit times" },
-                Meta = new string[] { "VisitTimes", "Estimated", graph.Name },
-                F = i =>
-                {
-                    int m = Convert.ToInt32(i);
-                    distributedPartitioner[m].EstimateBisimulationReduction();
                     var visitTimes = distributedPartitioner[m].VisitTimes;
-
-                    return new double[] { m + 1, visitTimes };
-                },
-            };
-
-            experiment.Run(0, M - 1, 1, 10);
-            return experiment;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TNode"></typeparam>
-        /// <typeparam name="TLabel"></typeparam>
-        /// <param name="graph"></param>
-        /// <param name="M"></param>
-        /// <returns></returns>
-        public static Experiment MeasureDistributedDataShipmentEstimate<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
-        {
-            var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
-
-            for (int i = 0; i < M; i++)
-            {
-                distributedPartitioner[i] = new DistributedGraphPartitioner<TNode, TLabel>(i + 1, graph);
-            }
-
-            var experiment = new Experiment(2)
-            {
-                Labels = new string[] { "Number of machines", "Data shipment" },
-                Meta = new string[] { "DataShipment", "Estimated", graph.Name },
-                F = i =>
-                {
-                    int m = Convert.ToInt32(i);
-                    distributedPartitioner[m].EstimateBisimulationReduction();
                     var dataShipment = distributedPartitioner[m].DataShipment;
 
-                    return new double[] { m + 1, dataShipment };
+                    return new double[] { m + 1, sequentialTime, distributedTime, visitTimes, dataShipment };
                 },
             };
 
+            var splits = new int[][]
+            {
+                new int[] { 0, 1, 2 },
+                new int[] { 0, 3 },
+                new int[] { 0, 4 }
+            };
+
             experiment.Run(0, M - 1, 1, 10);
-            return experiment;
+            var experiments = experiment.Split(splits);
+
+            experiments[0].Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)" };
+            experiments[0].Meta = new string[] { "Makespan", "Estimated", graph.Name };
+
+            experiments[1].Labels = new string[] { "Number of machines", "Visit times" };
+            experiments[1].Meta = new string[] { "VisitTimes", "Estimated", graph.Name };
+
+            experiments[2].Labels = new string[] { "Number of machines", "Data shipement" };
+            experiments[2].Meta = new string[] { "DataShipment", "Estimated", graph.Name };
+
+            return experiments;
         }
 
         /// <summary>
@@ -121,9 +71,9 @@ namespace GraphTools
         /// <typeparam name="TNode"></typeparam>
         /// <typeparam name="TLabel"></typeparam>
         /// <param name="graph"></param>
-        /// <param name="M">Maximum number of machines (at least 1).</param>
+        /// <param name="M"></param>
         /// <returns></returns>
-        public static Experiment MeasureDistributedMakespanExact<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
+        public static Experiment[] MeasureDistributedPerformanceExact<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
         {
             var sequentialPartitioner = new GraphPartitioner<TNode, TLabel>(graph);
             var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
@@ -133,10 +83,10 @@ namespace GraphTools
                 distributedPartitioner[i] = new DistributedGraphPartitioner<TNode, TLabel>(i + 1, graph);
             }
 
-            var experiment = new Experiment(3)
+            var experiment = new Experiment(5)
             {
-                Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)" },
-                Meta = new string[] { "Makespan", "Exact", graph.Name },
+                Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)", "Visit times", "Data shipment" },
+                Meta = new string[] { "Performance", "Exact", graph.Name },
                 F = i =>
                 {
                     int m = Convert.ToInt32(i);
@@ -144,83 +94,33 @@ namespace GraphTools
                     var sequentialTime = sequentialPartitioner.ElapsedMilliseconds;
                     distributedPartitioner[m].ExactBisimulationReduction();
                     var distributedTime = distributedPartitioner[m].ElapsedMilliseconds;
-
-                    return new double[] { m + 1, sequentialTime, distributedTime };
-                },
-            };
-
-            experiment.Run(0, M - 1, 1, 10);
-            return experiment;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TNode"></typeparam>
-        /// <typeparam name="TLabel"></typeparam>
-        /// <param name="graph"></param>
-        /// <param name="M"></param>
-        /// <returns></returns>
-        public static Experiment MeasureDistributedVisitTimesExact<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
-        {
-            var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
-
-            for (int i = 0; i < M; i++)
-            {
-                distributedPartitioner[i] = new DistributedGraphPartitioner<TNode, TLabel>(i + 1, graph);
-            }
-
-            var experiment = new Experiment(2)
-            {
-                Labels = new string[] { "Number of machines", "Visit times" },
-                Meta = new string[] { "VisitTimes", "Exact", graph.Name },
-                F = i =>
-                {
-                    int m = Convert.ToInt32(i);
-                    distributedPartitioner[m].ExactBisimulationReduction();
                     var visitTimes = distributedPartitioner[m].VisitTimes;
-
-                    return new double[] { m + 1, visitTimes };
-                },
-            };
-
-            experiment.Run(0, M - 1, 1, 10);
-            return experiment;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <typeparam name="TNode"></typeparam>
-        /// <typeparam name="TLabel"></typeparam>
-        /// <param name="graph"></param>
-        /// <param name="M"></param>
-        /// <returns></returns>
-        public static Experiment MeasureDistributedDataShipmentExact<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
-        {
-            var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
-
-            for (int i = 0; i < M; i++)
-            {
-                distributedPartitioner[i] = new DistributedGraphPartitioner<TNode, TLabel>(i + 1, graph);
-            }
-
-            var experiment = new Experiment(2)
-            {
-                Labels = new string[] { "Number of machines", "Data shipment" },
-                Meta = new string[] { "DataShipment", "Exact", graph.Name },
-                F = i =>
-                {
-                    int m = Convert.ToInt32(i);
-                    distributedPartitioner[m].ExactBisimulationReduction();
                     var dataShipment = distributedPartitioner[m].DataShipment;
 
-                    return new double[] { m + 1, dataShipment };
+                    return new double[] { m + 1, sequentialTime, distributedTime, visitTimes, dataShipment };
                 },
             };
 
+            var splits = new int[][]
+            {
+                new int[] { 0, 1, 2 },
+                new int[] { 0, 3 },
+                new int[] { 0, 4 }
+            };
+
             experiment.Run(0, M - 1, 1, 10);
-            return experiment;
+            var experiments = experiment.Split(splits);
+
+            experiments[0].Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)" };
+            experiments[0].Meta = new string[] { "Makespan", "Exact", graph.Name };
+
+            experiments[1].Labels = new string[] { "Number of machines", "Visit times" };
+            experiments[1].Meta = new string[] { "VisitTimes", "Exact", graph.Name };
+
+            experiments[2].Labels = new string[] { "Number of machines", "Data shipement" };
+            experiments[2].Meta = new string[] { "DataShipment", "Exact", graph.Name };
+
+            return experiments;
         }
     }
 }
