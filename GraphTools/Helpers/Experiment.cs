@@ -63,7 +63,8 @@ namespace GraphTools.Helpers
         }
 
         /// <summary>
-        /// 
+        /// Creates new experiments from this experiment.
+        /// The column (variable) sets tell which experiment copies which set of columns.
         /// </summary>
         /// <param name="columnSets"></param>
         /// <returns></returns>
@@ -83,6 +84,7 @@ namespace GraphTools.Helpers
                 }
 
                 experiment.setResults(newResults);
+                experiment.Labels = columnSet.Select(index => Labels[index]).ToArray();
                 experiments[i++] = experiment;
             }
 

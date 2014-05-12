@@ -8,7 +8,7 @@ namespace GraphTools
     static partial class Experiments
     {
         /// <summary>
-        /// 
+        /// Creates three experiments for measuring the makespan, visit times and data shipment of the distributed estimated bisimulation algorithm.
         /// </summary>
         /// <typeparam name="TNode"></typeparam>
         /// <typeparam name="TLabel"></typeparam>
@@ -43,6 +43,8 @@ namespace GraphTools
                 },
             };
 
+            experiment.Run(0, M - 1, 1, 10);
+
             var splits = new int[][]
             {
                 new int[] { 0, 1, 2 },
@@ -50,23 +52,16 @@ namespace GraphTools
                 new int[] { 0, 4 }
             };
 
-            experiment.Run(0, M - 1, 1, 10);
             var experiments = experiment.Split(splits);
-
-            experiments[0].Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)" };
             experiments[0].Meta = new string[] { "Makespan", "Estimated", graph.Name };
-
-            experiments[1].Labels = new string[] { "Number of machines", "Visit times" };
             experiments[1].Meta = new string[] { "VisitTimes", "Estimated", graph.Name };
-
-            experiments[2].Labels = new string[] { "Number of machines", "Data shipement" };
             experiments[2].Meta = new string[] { "DataShipment", "Estimated", graph.Name };
 
             return experiments;
         }
 
         /// <summary>
-        /// 
+        /// Creates three experiments for measuring the makespan, visit times and data shipment of the distributed exact bisimulation algorithm.
         /// </summary>
         /// <typeparam name="TNode"></typeparam>
         /// <typeparam name="TLabel"></typeparam>
@@ -101,6 +96,8 @@ namespace GraphTools
                 },
             };
 
+            experiment.Run(0, M - 1, 1, 10);
+
             var splits = new int[][]
             {
                 new int[] { 0, 1, 2 },
@@ -108,16 +105,9 @@ namespace GraphTools
                 new int[] { 0, 4 }
             };
 
-            experiment.Run(0, M - 1, 1, 10);
             var experiments = experiment.Split(splits);
-
-            experiments[0].Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)" };
             experiments[0].Meta = new string[] { "Makespan", "Exact", graph.Name };
-
-            experiments[1].Labels = new string[] { "Number of machines", "Visit times" };
             experiments[1].Meta = new string[] { "VisitTimes", "Exact", graph.Name };
-
-            experiments[2].Labels = new string[] { "Number of machines", "Data shipement" };
             experiments[2].Meta = new string[] { "DataShipment", "Exact", graph.Name };
 
             return experiments;
