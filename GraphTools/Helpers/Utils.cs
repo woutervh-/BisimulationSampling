@@ -184,8 +184,8 @@ namespace GraphTools.Helpers
             public int GetHashCode(Tuple<T1, T2> obj)
             {
                 int hash = 1;
-                hash = hash * 17 + obj.Item1.GetHashCode();
-                hash = hash * 31 + obj.Item2.GetHashCode();
+                hash = hash * 17 + comparer1.GetHashCode(obj.Item1);
+                hash = hash * 31 + comparer2.GetHashCode(obj.Item2);
                 return hash;
             }
         }

@@ -1,6 +1,7 @@
 ﻿using GraphTools.Distributed.Machines;
 using GraphTools.Distributed.Messages;
 using GraphTools.Graph;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -79,6 +80,10 @@ namespace GraphTools.Distributed
             this.m = m;
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <returns></returns>
         public IDictionary<TNode, int> ExactBisimulationReduction()
         {
             IDictionary<TNode, int> distributedPartition = null;

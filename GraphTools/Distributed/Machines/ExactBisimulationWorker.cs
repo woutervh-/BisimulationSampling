@@ -230,10 +230,6 @@ namespace GraphTools.Distributed.Machines
 
         private void refine()
         {
-            var comparer1 = EqualityComparer<TLabel>.Default;
-            var comparer2 = new Utils.HashSetEqualityComparer<Tuple<TLabel, int>>();
-            var comparer = new Utils.PairEqualityComparer<TLabel, HashSet<Tuple<TLabel, int>>>(comparer1, comparer2);
-
             var newPartition = new Dictionary<TNode, int>();
             partitionMap.Clear();
             int counter = 0;

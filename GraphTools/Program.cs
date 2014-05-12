@@ -72,9 +72,9 @@ namespace GraphTools
             // Load graph and labels
             var graph = GraphLoader.LoadGraphML(path, int.Parse, int.Parse);
 
-            /*
+            //*
             var partitioner = new GraphPartitioner<int, int>(graph);
-            var distributedPartitioner = new DistributedGraphPartitioner<int, int>(8, graph);
+            var distributedPartitioner = new DistributedGraphPartitioner<int, int>(1, graph);
             //*/
             
             /*
@@ -87,7 +87,7 @@ namespace GraphTools
             Console.ReadLine();
             //*/
 
-            /*
+            //*
             var estim = GraphGenerator.ReducedGraph(graph, distributedPartitioner.ExactBisimulationReduction);
             var exact = GraphGenerator.ReducedGraph(graph, partitioner.EstimateBisimulationReduction);
             //*/
@@ -98,11 +98,11 @@ namespace GraphTools
             // GraphConverter.SaveToGraphML(coarse, Path.GetDirectoryName(path) + @"\" + graph.Name + "_coarse.xml");
             //*/
 
-            /*
+            //*
             var k_max = partitioner.MultilevelExactBisimulationReduction().Count - 1;
             var metrics = GraphMetrics.BisimulationEquivalence(estim, exact, k_max);
 
-            if (!(metrics.Item1 == metrics.Item2 && metrics.Item2 == metrics.Item3))
+            if (!(metrics.Item1 == metrics.Item2 && metrics.Item2 == metrics.Item3 && estim.NumNodes == exact.NumNodes && estim.NumEdges == exact.NumEdges))
             {
                 Console.WriteLine("Nope");
                 Console.ReadLine();
@@ -203,7 +203,7 @@ namespace GraphTools
             // var experiment = Experiments.DistanceProbabilityMassFunction(graph);
             // var experiment = Experiments.MeasureDistributedPerformance(graph, 8);
             // var experiment = Experiments.MeasureDistributedVisitTimes(graph, 8);
-            var experiment = Experiments.MeasureDistributedDataShipmentEstimate(graph, 8);
+            var experiment = Experiments.MeasureDistributedDataShipmentExact(graph, 8);
             Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
             experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
             //*/
