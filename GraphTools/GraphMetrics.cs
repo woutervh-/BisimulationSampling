@@ -82,7 +82,7 @@ namespace GraphTools
 
             // Perform bisimulation reduction
             var partitioner = new GraphPartitioner<Tuple<int, TNode>, TLabel>(G);
-            var partition = partitioner.BoundedBisimulationReduction(k);
+            var partition = partitioner.BoundedExactBisimulationReduction(k);
 
             // Partition blocks of G1 and G2
             HashSet<int> P1 = new HashSet<int>();
@@ -176,7 +176,7 @@ namespace GraphTools
 
             // Perform bisimulation reduction
             var partitioner = new GraphPartitioner<Tuple<int, TNode>, TLabel>(G);
-            var partition = partitioner.BoundedBisimulationReduction(k);
+            var partition = partitioner.BoundedExactBisimulationReduction(k);
 
             // Partition blocks of G1, G2 and G1 and G2 total
             HashSet<int> P1 = new HashSet<int>();

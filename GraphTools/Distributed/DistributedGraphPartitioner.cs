@@ -79,6 +79,58 @@ namespace GraphTools.Distributed
             this.m = m;
         }
 
+        public IDictionary<TNode, int> ExactBisimulationReduction()
+        {
+            IDictionary<TNode, int> distributedPartition = null;
+            var segments = DistributedUtils.ExploreSplit(graph, m);
+            var workers = ExactBisimulationWorker<TNode, TLabel>.CreateWorkers(graph, segments);
+            ExactBisimulationCoordinator<TNode, TLabel> coordinator = null;
+            coordinator = new ExactBisimulationCoordinator<TNode, TLabel>((k_max, foundPartition) =>
+            {
+                // Console.WriteLine("k_max=" + k_max);
+                distributedPartition = foundPartition;
+
+                coordinator.Stop();
+                foreach (var worker in workers)
+                {
+                    worker.Stop();
+                }
+            });
+
+            // Start bisimulation partition computation
+            coordinator.SendMe(new CoordinatorMessage(null, workers));
+
+            // Create tasks
+            var tasks = new Task[m + 1];
+            for (int i = 0; i < m; i++)
+            {
+                tasks[i] = new Task(workers[i].Run);
+            }
+            tasks[m] = new Task(coordinator.Run);
+
+            stopwatch.Reset();
+            stopwatch.Start();
+            {
+                // Run each task
+                foreach (var task in tasks)
+                {
+                    task.Start();
+                }
+
+                // Wait for each task to finish
+                foreach (var task in tasks)
+                {
+                    task.Wait();
+                }
+            }
+            stopwatch.Stop();
+
+            visitTimes = workers.Sum(worker => worker.VisitTimes);
+            dataShipment = workers.Sum(worker => worker.DataShipment);
+
+            return distributedPartition;
+        }
+
         /// <summary>
         /// 
         /// </summary>

@@ -113,10 +113,10 @@ namespace GraphTools
         /// Compute the (unbounded) bisimulation partition of a graph.
         /// </summary>
         /// <returns></returns>
-        public IDictionary<TNode, int> BisimulationReduction()
+        public IDictionary<TNode, int> ExactBisimulationReduction()
         {
             // Compute partitions from 0 to k_max
-            var partitions = MultilevelBisimulationReduction();
+            var partitions = MultilevelExactBisimulationReduction();
 
             // Return the k_max partition
             return partitions[partitions.Count - 1];
@@ -127,7 +127,7 @@ namespace GraphTools
         /// Return all intermediate 0..k_max depth bisimulation partitions.
         /// </summary>
         /// <returns></returns>
-        public List<IDictionary<TNode, int>> MultilevelBisimulationReduction()
+        public List<IDictionary<TNode, int>> MultilevelExactBisimulationReduction()
         {
             var partitions = new List<IDictionary<TNode, int>>();
 
@@ -217,7 +217,7 @@ namespace GraphTools
         /// </summary>
         /// <param name="k"></param>
         /// <returns></returns>
-        public IDictionary<TNode, int> BoundedBisimulationReduction(int k)
+        public IDictionary<TNode, int> BoundedExactBisimulationReduction(int k)
         {
             var partitions = new Dictionary<TNode, int>[k + 1];
 

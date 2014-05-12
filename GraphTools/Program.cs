@@ -76,19 +76,21 @@ namespace GraphTools
             var partitioner = new GraphPartitioner<int, int>(graph);
             var distributedPartitioner = new DistributedGraphPartitioner<int, int>(8, graph);
             //*/
-
+            
             /*
             Console.WriteLine("Go seq " + DateTime.Now);
-            partitioner.EstimateBisimulationReduction();
+            partitioner.ExactBisimulationReduction();
             Console.WriteLine("End seq " + DateTime.Now);
             Console.WriteLine("Go dis " + DateTime.Now);
-            distributedPartitioner.EstimateBisimulationReduction();
+            distributedPartitioner.ExactBisimulationReduction();
             Console.WriteLine("End dis " + DateTime.Now);
             Console.ReadLine();
             //*/
 
-            // var estim = GraphGenerator.ReducedGraph(graph, distributedPartitioner.EstimateBisimulationReduction);
-            // var exact = GraphGenerator.ReducedGraph(graph, partitioner.BisimulationReduction);
+            /*
+            var estim = GraphGenerator.ReducedGraph(graph, distributedPartitioner.ExactBisimulationReduction);
+            var exact = GraphGenerator.ReducedGraph(graph, partitioner.EstimateBisimulationReduction);
+            //*/
 
             //*
             // GraphConverter.SaveToGraphML(estim, Path.GetDirectoryName(path) + @"\" + graph.Name + "_estim.xml");
@@ -97,7 +99,7 @@ namespace GraphTools
             //*/
 
             /*
-            var k_max = partitioner.MultilevelBisimulationReduction().Count - 1;
+            var k_max = partitioner.MultilevelExactBisimulationReduction().Count - 1;
             var metrics = GraphMetrics.BisimulationEquivalence(estim, exact, k_max);
 
             if (!(metrics.Item1 == metrics.Item2 && metrics.Item2 == metrics.Item3))
@@ -201,7 +203,7 @@ namespace GraphTools
             // var experiment = Experiments.DistanceProbabilityMassFunction(graph);
             // var experiment = Experiments.MeasureDistributedPerformance(graph, 8);
             // var experiment = Experiments.MeasureDistributedVisitTimes(graph, 8);
-            var experiment = Experiments.MeasureDistributedDataShipment(graph, 8);
+            var experiment = Experiments.MeasureDistributedDataShipmentEstimate(graph, 8);
             Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
             experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
             //*/

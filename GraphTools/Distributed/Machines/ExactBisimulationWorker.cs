@@ -37,9 +37,9 @@ namespace GraphTools.Distributed.Machines
         private Dictionary<TNode, int> partition;
 
         /// <summary>
-        /// Function indicating which nodes have changed block since the previous partition.
+        /// 
         /// </summary>
-        private Dictionary<TNode, bool> changed;
+        private Dictionary<Tuple<TLabel, HashSet<Tuple<TLabel, int>>>, int> partitionMap;
 
         /// <summary>
         /// 
@@ -108,7 +108,6 @@ namespace GraphTools.Distributed.Machines
             this.owner = owner;
             this.ownerInverted = Utils.Invert(owner);
             this.interestedIn = new Dictionary<ExactBisimulationWorker<TNode, TLabel>, HashSet<TNode>>();
-            this.changed = new Dictionary<TNode, bool>();
 
             // Initialize interested-in function
             foreach (var worker in ownerInverted.Keys)
@@ -128,12 +127,6 @@ namespace GraphTools.Distributed.Machines
                 }
             }
             interestedIn.Remove(this);
-
-            // Initialize changed function
-            foreach (var node in ownerInverted[this])
-            {
-                changed.Add(node, default(bool));
-            }
         }
 
         protected override void OnReceive(AbstractMessage message)
@@ -143,13 +136,27 @@ namespace GraphTools.Distributed.Machines
                 {
                     // Reset partition and send sync message
                     clear();
-                    clearMessage.Sender.SendMe(new ExactRefinedMessage(this));
+                    clearMessage.Sender.SendMe(new ExactRefinedMessage<TLabel>(this, partitionMap));
                 })
                 .Case((RefineMessage refineMessage) =>
                 {
                     // Perform local refine step
                     refine();
-                    refineMessage.Sender.SendMe(new ExactRefinedMessage(this));
+                    refineMessage.Sender.SendMe(new ExactRefinedMessage<TLabel>(this, partitionMap));
+                })
+                .Case((RemapPartitionMessage remapPartitionMessage) =>
+                {
+                    var remap = new Dictionary<int, int>();
+
+                    foreach (var kvp in remapPartitionMessage.Map)
+                    {
+                        remap.Add(kvp.Key, kvp.Value);
+                    }
+
+                    foreach (var node in ownerInverted[this])
+                    {
+                        partition[node] = remap[partition[node]];
+                    }
                 })
                 .Case((CountMessage countMessage) =>
                 {
@@ -171,11 +178,11 @@ namespace GraphTools.Distributed.Machines
                     {
                         if (worker != this)
                         {
-                            var changedNodesOfInterest = partition.Where(kvp => interestedIn[worker].Contains(kvp.Key) && changed[kvp.Key]);
+                            var nodesOfInterest = partition.Where(kvp => interestedIn[worker].Contains(kvp.Key));
 
-                            if (changedNodesOfInterest.Any())
+                            if (nodesOfInterest.Any())
                             {
-                                worker.SendMe(new UpdatePartitionMessage<TNode>(this, changedNodesOfInterest));
+                                worker.SendMe(new UpdatePartitionMessage<TNode>(this, nodesOfInterest));
                             }
                         }
                     }
@@ -197,60 +204,64 @@ namespace GraphTools.Distributed.Machines
 
         private void clear()
         {
+            var comparer1 = EqualityComparer<TLabel>.Default;
+            var comparer2 = new Utils.HashSetEqualityComparer<Tuple<TLabel, int>>();
+            var comparer = new Utils.PairEqualityComparer<TLabel, HashSet<Tuple<TLabel, int>>>(comparer1, comparer2);
+
             partition = new Dictionary<TNode, int>();
+            partitionMap = new Dictionary<Tuple<TLabel, HashSet<Tuple<TLabel, int>>>, int>(comparer);
+            int counter = 0;
 
             foreach (var node in graph.Nodes)
             {
                 if (owner[node] == this)
                 {
-                    partition.Add(node, Hash(graph.NodeLabel(node)));
-                    changed[node] = true;
-                }
-                else
-                {
-                    partition.Add(node, default(int));
+                    var signature = Tuple.Create(graph.NodeLabel(node), new HashSet<Tuple<TLabel, int>>());
+
+                    if (!partitionMap.ContainsKey(signature))
+                    {
+                        partitionMap.Add(signature, counter++);
+                    }
+
+                    partition.Add(node, partitionMap[signature]);
                 }
             }
         }
 
         private void refine()
         {
+            var comparer1 = EqualityComparer<TLabel>.Default;
+            var comparer2 = new Utils.HashSetEqualityComparer<Tuple<TLabel, int>>();
+            var comparer = new Utils.PairEqualityComparer<TLabel, HashSet<Tuple<TLabel, int>>>(comparer1, comparer2);
+
             var newPartition = new Dictionary<TNode, int>();
+            partitionMap.Clear();
+            int counter = 0;
 
             foreach (var u in graph.Nodes)
             {
                 if (owner[u] == this)
                 {
-                    var H = new HashSet<int>();
-                    H.Add(Hash(graph.NodeLabel(u)));
-
-                    // Compute the hashes for pairs (label[u, v], pId_k-1(v))
+                    var S = new HashSet<Tuple<TLabel, int>>();
                     foreach (var eo in graph.Out(u))
                     {
                         var v = graph.Target(eo);
-                        var edgeHash = Hash(graph.EdgeLabel(eo), partition[v]);
-                        if (!H.Contains(edgeHash))
+                        var t = Tuple.Create(graph.EdgeLabel(eo), partition[v]);
+                        if (!S.Contains(t))
                         {
-                            H.Add(edgeHash);
+                            S.Add(t);
                         }
                     }
 
-                    // Combine the hashes using some associative-commutative operator
-                    int hash = 0;
-                    foreach (var edgeHash in H)
+                    var signature = Tuple.Create(graph.NodeLabel(u), S);
+
+                    if (!partitionMap.ContainsKey(signature))
                     {
-                        hash += edgeHash;
+                        partitionMap.Add(signature, counter++);
                     }
 
                     // Assign partition block to node
-                    newPartition.Add(u, hash);
-
-                    // Determine if u has changed
-                    changed[u] = partition[u] != hash;
-                }
-                else
-                {
-                    newPartition.Add(u, partition[u]);
+                    newPartition.Add(u, partitionMap[signature]);
                 }
             }
 

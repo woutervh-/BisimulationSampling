@@ -86,12 +86,27 @@ namespace GraphTools.Distributed.Machines
                         worker.SendMe(new ClearMessage(this));
                     }
                 })
-                .Case((ExactRefinedMessage refinedMessage) =>
+                .Case((ExactRefinedMessage<TLabel> refinedMessage) =>
                 {
                     state[refinedMessage.Sender] = WorkerState.Waiting;
 
+                    var remap = new Dictionary<int, int>();
+                    foreach (var kvp in refinedMessage.PartitionMap)
+                    {
+                        if (!signatures.ContainsKey(kvp.Key))
+                        {
+                            signatures.Add(kvp.Key, counter++);
+                        }
+
+                        remap.Add(kvp.Value, signatures[kvp.Key]);
+                    }
+
+                    refinedMessage.Sender.SendMe(new RemapPartitionMessage(this, remap));
+
                     if (workers.All(worker => state[worker] == WorkerState.Waiting))
                     {
+                        signatures.Clear();
+
                         // All workers have refined, now perform a share step
                         foreach (var worker in workers)
                         {

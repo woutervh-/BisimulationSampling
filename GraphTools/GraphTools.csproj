@@ -22,7 +22,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <Prefer32Bit>true</Prefer32Bit>
+    <Prefer32Bit>false</Prefer32Bit>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -78,8 +78,8 @@
     <Compile Include="Distributed\Messages\DummyMessage.cs" />
     <Compile Include="Distributed\Messages\CountedMessage.cs" />
     <Compile Include="Distributed\Messages\ExactRefinedMessage.cs" />
-    <Compile Include="Distributed\Messages\MapUpdateMessage.cs" />
     <Compile Include="Distributed\Messages\RefineMessage.cs" />
+    <Compile Include="Distributed\Messages\RemapPartitionMessage.cs" />
     <Compile Include="Distributed\Messages\SegmentRequestMessage.cs" />
     <Compile Include="Distributed\Messages\SegmentResponseMessage.cs" />
     <Compile Include="Distributed\Messages\SharedMessage.cs" />
@@ -87,7 +87,9 @@
     <Compile Include="Distributed\Messages\EstimateRefinedMessage.cs" />
     <Compile Include="Distributed\Messages\UpdatePartitionMessage.cs" />
     <Compile Include="Dummy.cs" />
-    <Compile Include="Experiments.cs" />
+    <Compile Include="Experiments\CoverageCorrectnessExperiments.cs" />
+    <Compile Include="Experiments\GraphPropertiesExperiments.cs" />
+    <Compile Include="Experiments\PerformanceExperiments.cs" />
     <Compile Include="GraphConverter.cs" />
     <Compile Include="GraphGenerator.cs" />
     <Compile Include="GraphLoader.cs" />
@@ -109,7 +111,6 @@
   <ItemGroup>
     <None Include="packages.config" />
     <None Include="Properties\App.config" />
-    <None Include="Properties\packages.config" />
   </ItemGroup>
   <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

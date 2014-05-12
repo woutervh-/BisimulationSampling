@@ -247,7 +247,7 @@ namespace GraphTools
             // Transform tree to DAG with nicer partition block distribution
             var copy = graph.Clone();
             var partitioner = new GraphPartitioner<int, int>(graph);
-            var partition = partitioner.BoundedBisimulationReduction(D);
+            var partition = partitioner.BoundedExactBisimulationReduction(D);
             var partitionInverted = Utils.Invert(partition);
             var blocks = partition.Values.Distinct();
             var blockSizes = Utils.Distribution(partition.Values);
