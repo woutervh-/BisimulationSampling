@@ -1,4 +1,5 @@
-﻿using GraphTools.Graph;
+﻿/*
+using GraphTools.Graph;
 using GraphTools.Plot;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -70,3 +71,4 @@ namespace GraphTools
         }
     }
 }
+//*/
