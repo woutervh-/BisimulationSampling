@@ -206,7 +206,19 @@ namespace GraphTools
             //*/
 
             //*
-            var experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, 8);
+            int M = Input("Maximum number of machines?", int.Parse);
+            int algorithm = Select("Algorithm?", new string[] { "Exact", "Estimate" });
+            Experiment[] experiments = null;
+            switch (algorithm)
+            {
+                case 0:
+                    experiments = Experiments.MeasureDistributedPerformanceExact(graph, M);
+                    break;
+                case 1:
+                    experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, M);
+                    break;
+            }
+            
             foreach (var experiment in experiments)
             {
                 Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
