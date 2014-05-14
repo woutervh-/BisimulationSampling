@@ -84,10 +84,10 @@ namespace GraphTools.Distributed
         /// 
         /// </summary>
         /// <returns></returns>
-        public IDictionary<TNode, int> ExactBisimulationReduction()
+        public IDictionary<TNode, int> ExactBisimulationReduction(Func<MultiDirectedGraph<TNode, TLabel>, int, Dictionary<TNode, int>> splitter)
         {
             IDictionary<TNode, int> distributedPartition = null;
-            var segments = DistributedUtils.ExploreSplit(graph, m);
+            var segments = splitter(graph, m);
             var workers = ExactBisimulationWorker<TNode, TLabel>.CreateWorkers(graph, segments);
             ExactBisimulationCoordinator<TNode, TLabel> coordinator = null;
             coordinator = new ExactBisimulationCoordinator<TNode, TLabel>((k_max, foundPartition) =>
@@ -140,10 +140,10 @@ namespace GraphTools.Distributed
         /// 
         /// </summary>
         /// <returns></returns>
-        public IDictionary<TNode, int> EstimateBisimulationReduction()
+        public IDictionary<TNode, int> EstimateBisimulationReduction(Func<MultiDirectedGraph<TNode,TLabel>, int, Dictionary<TNode, int>> splitter)
         {
             IDictionary<TNode, int> distributedPartition = null;
-            var segments = DistributedUtils.ExploreSplit(graph, m);
+            var segments = splitter(graph, m);
             var workers = EstimateBisimulationWorker<TNode, TLabel>.CreateWorkers(graph, segments);
             EstimateBisimulationCoordinator<TNode> coordinator = null;
             coordinator = new EstimateBisimulationCoordinator<TNode>((k_max, foundPartition) =>

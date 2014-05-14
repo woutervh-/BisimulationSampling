@@ -2,6 +2,7 @@
 using GraphTools.Graph;
 using GraphTools.Helpers;
 using System;
+using System.Collections.Generic;
 
 namespace GraphTools
 {
@@ -15,7 +16,7 @@ namespace GraphTools
         /// <param name="graph"></param>
         /// <param name="M"></param>
         /// <returns></returns>
-        public static Experiment[] MeasureDistributedPerformanceEstimate<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
+        public static Experiment[] MeasureDistributedPerformanceEstimate<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M, Func<MultiDirectedGraph<TNode, TLabel>, int, Dictionary<TNode, int>> splitter, string splitterName)
         {
             var sequentialPartitioner = new GraphPartitioner<TNode, TLabel>(graph);
             var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
@@ -28,13 +29,13 @@ namespace GraphTools
             var experiment = new Experiment(5)
             {
                 Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)", "Visit times", "Data shipment" },
-                Meta = new string[] { "Performance", "Estimated", graph.Name },
+                Meta = new string[] { splitterName, "Performance", "Estimated", graph.Name },
                 F = i =>
                 {
                     int m = Convert.ToInt32(i);
                     sequentialPartitioner.EstimateBisimulationReduction();
                     var sequentialTime = sequentialPartitioner.ElapsedMilliseconds;
-                    distributedPartitioner[m].EstimateBisimulationReduction();
+                    distributedPartitioner[m].EstimateBisimulationReduction(splitter);
                     var distributedTime = distributedPartitioner[m].ElapsedMilliseconds;
                     var visitTimes = distributedPartitioner[m].VisitTimes;
                     var dataShipment = distributedPartitioner[m].DataShipment;
@@ -53,9 +54,9 @@ namespace GraphTools
             };
 
             var experiments = experiment.Split(splits);
-            experiments[0].Meta = new string[] { "Makespan", "Estimated", graph.Name };
-            experiments[1].Meta = new string[] { "VisitTimes", "Estimated", graph.Name };
-            experiments[2].Meta = new string[] { "DataShipment", "Estimated", graph.Name };
+            experiments[0].Meta = new string[] { splitterName, "Makespan", "Estimated", graph.Name };
+            experiments[1].Meta = new string[] { splitterName, "VisitTimes", "Estimated", graph.Name };
+            experiments[2].Meta = new string[] { splitterName, "DataShipment", "Estimated", graph.Name };
 
             return experiments;
         }
@@ -68,7 +69,7 @@ namespace GraphTools
         /// <param name="graph"></param>
         /// <param name="M"></param>
         /// <returns></returns>
-        public static Experiment[] MeasureDistributedPerformanceExact<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M)
+        public static Experiment[] MeasureDistributedPerformanceExact<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph, int M, Func<MultiDirectedGraph<TNode, TLabel>, int, Dictionary<TNode, int>> splitter, string splitterName)
         {
             var sequentialPartitioner = new GraphPartitioner<TNode, TLabel>(graph);
             var distributedPartitioner = new DistributedGraphPartitioner<TNode, TLabel>[M];
@@ -81,13 +82,13 @@ namespace GraphTools
             var experiment = new Experiment(5)
             {
                 Labels = new string[] { "Number of machines", "Sequential (ms)", "Distributed (ms)", "Visit times", "Data shipment" },
-                Meta = new string[] { "Performance", "Exact", graph.Name },
+                Meta = new string[] { splitterName, "Performance", "Exact", graph.Name },
                 F = i =>
                 {
                     int m = Convert.ToInt32(i);
                     sequentialPartitioner.ExactBisimulationReduction();
                     var sequentialTime = sequentialPartitioner.ElapsedMilliseconds;
-                    distributedPartitioner[m].ExactBisimulationReduction();
+                    distributedPartitioner[m].ExactBisimulationReduction(splitter);
                     var distributedTime = distributedPartitioner[m].ElapsedMilliseconds;
                     var visitTimes = distributedPartitioner[m].VisitTimes;
                     var dataShipment = distributedPartitioner[m].DataShipment;
@@ -106,9 +107,9 @@ namespace GraphTools
             };
 
             var experiments = experiment.Split(splits);
-            experiments[0].Meta = new string[] { "Makespan", "Exact", graph.Name };
-            experiments[1].Meta = new string[] { "VisitTimes", "Exact", graph.Name };
-            experiments[2].Meta = new string[] { "DataShipment", "Exact", graph.Name };
+            experiments[0].Meta = new string[] { splitterName, "Makespan", "Exact", graph.Name };
+            experiments[1].Meta = new string[] { splitterName, "VisitTimes", "Exact", graph.Name };
+            experiments[2].Meta = new string[] { splitterName, "DataShipment", "Exact", graph.Name };
 
             return experiments;
         }

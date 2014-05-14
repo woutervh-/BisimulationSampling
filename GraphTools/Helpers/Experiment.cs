@@ -51,7 +51,7 @@ namespace GraphTools.Helpers
         private int n;
 
         /// <summary>
-        /// Create new experiment.
+        /// Create a new experiment.
         /// </summary>
         /// <param name="n">Number of variables (including horizontal axis variable.)</param>
         public Experiment(int n)
