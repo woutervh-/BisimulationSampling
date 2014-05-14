@@ -207,7 +207,7 @@ namespace GraphTools
 
             //*
             int M = Input("Maximum number of machines?", int.Parse);
-            int algorithm = Select("Algorithm?", new string[] { "Exact (explore)", "Estimate (explore)", "Exact (random)", "Explore (random)" });
+            int algorithm = Select("Algorithm?", new string[] { "Exact (explore)", "Estimate (explore)", "Exact (random)", "Explore (random)", "All of the above" });
             Experiment[] experiments = null;
             switch (algorithm)
             {
@@ -222,6 +222,13 @@ namespace GraphTools
                     break;
                 case 3:
                     experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.RandomSplit, "Random");
+                    break;
+                case 4:
+                    var exps1 = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.ExploreSplit, "Explore");
+                    var exps2 = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.ExploreSplit, "Explore");
+                    var exps3 = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.RandomSplit, "Random");
+                    var exps4 = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.RandomSplit, "Random");
+                    experiments = exps1.Concat(exps2).Concat(exps3).Concat(exps4).ToArray();
                     break;
             }
             
