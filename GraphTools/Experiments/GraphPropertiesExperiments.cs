@@ -20,7 +20,7 @@ namespace GraphTools
             var distribution = new Dictionary<int, int>();
             object @lock = new object();
 
-            Parallel.ForEach(graph.Nodes, Program.ParallelOptions, node =>
+            Parallel.ForEach(graph.Nodes, node =>
             {
                 var distances = Utils.SingleSourceDistances(graph, node).Values.Where(distance => distance > 0 && distance < int.MaxValue);
 

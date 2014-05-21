@@ -276,6 +276,24 @@ namespace GraphTools.Helpers
         }
 
         /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="plotModel"></param>
+        /// <returns></returns>
+        public Axis GetHorizontalAxis(PlotModel plotModel)
+        {
+            foreach (var axis in plotModel.Axes)
+            {
+                if (axis.Title == Labels[HorizontalAxis])
+                {
+                    return axis;
+                }
+            }
+
+            throw new ArgumentException();
+        }
+
+        /// <summary>
         /// Save plot model to SVG file.
         /// </summary>
         /// <param name="path"></param>

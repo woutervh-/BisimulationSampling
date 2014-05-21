@@ -19,39 +19,59 @@ namespace GraphTools
     class Program
     {
         /// <summary>
-        /// Options for parallelism
+        /// Run all performance experiments sequentially.
         /// </summary>
-        public static ParallelOptions ParallelOptions = new ParallelOptions()
+        public static void AllPerformanceExperiments()
         {
-            MaxDegreeOfParallelism = 3,
-        };
+            string path = Input("Please enter the path to folder with graph files", string.Copy);
+            int M = Input("Maximum number of machines?", int.Parse);
+            int algorithm = Select("Algorithm?", new string[] { "Exact (explore)", "Estimate (explore)", "Exact (random)", "Estimate (random)", "All of the above" });
 
-        /*
-        /// <summary>
-        /// Generate a graph and save it to a GraphML file.
-        /// </summary>
-        public static void UseGenerator()
-        {
-            string path = Input("Please enter an output path", string.Copy);
-            // int k = Input("Please enter a value for k in k-bisimulation", int.Parse);
-            // int s = Input("Please enter the degree of a star", int.Parse);
-            // int p = Input("Please enter the desired number of partition blocks", int.Parse);
-            // int n = Input("Please enter the desired number of nodes", int.Parse);
-            // double p = Input("Please enter the edge probability", double.Parse);
-            int D = Input("Please enter a depth value", int.Parse);
-            int b = Input("Please enter a degree upper bound", int.Parse);
+            string outPath = Path.GetDirectoryName(path) + @"\Dummy";
+            if (!Directory.Exists(outPath))
+            {
+                Directory.CreateDirectory(outPath);
+            }
 
-            // var loaded = GraphGenerator.GenerateChains(n, p, k);
-            // var loaded = GraphGenerator.GenerateStars(n, p, s);
-            // var loaded = GraphGenerator.GenerateTrees(n, p, k);
-            // var loaded = GraphGenerator.ErdosRenyi(n, p);
-            var loaded = GraphGenerator.GenerateNiceDAG(D, b);
-            var graph = loaded.Item1;
-            var labels = loaded.Item2;
+            string[] filePaths = Directory.GetFiles(path, "*.xml");
+            foreach (var filePath in filePaths)
+            {
+                var graph = GraphLoader.LoadGraphML(filePath, int.Parse, int.Parse);
 
-            GraphConverter.SaveToGraphML(graph, labels, path);
+                Experiment[] experiments = null;
+                switch (algorithm)
+                {
+                    case 0:
+                        experiments = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.ExploreSplit, "Explore");
+                        break;
+                    case 1:
+                        experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.ExploreSplit, "Explore");
+                        break;
+                    case 2:
+                        experiments = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.RandomSplit, "Random");
+                        break;
+                    case 3:
+                        experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.RandomSplit, "Random");
+                        break;
+                    case 4:
+                        var exps1 = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.ExploreSplit, "Explore");
+                        var exps2 = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.ExploreSplit, "Explore");
+                        var exps3 = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.RandomSplit, "Random");
+                        var exps4 = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.RandomSplit, "Random");
+                        experiments = exps1.Concat(exps2).Concat(exps3).Concat(exps4).ToArray();
+                        break;
+                }
+
+                foreach (var experiment in experiments)
+                {
+                    var plot = experiment.Plot(0, double.NaN);
+                    experiment.GetHorizontalAxis(plot).MinorTickSize = 0;
+                    experiment.GetHorizontalAxis(plot).MajorStep = 1;
+                    Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", plot);
+                    experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
+                }
+            }
         }
-        //*/
 
         /// <summary>
         /// Entry point.
@@ -59,12 +79,16 @@ namespace GraphTools
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
+            //*
+            AllPerformanceExperiments();
+            return;
+            //*/
+
             /* Using the generator
             UseGenerator();
             return;
             //*/
 
-            //*
             // Ask for graph file
             string path = Input("Please enter the path to the graph file", string.Copy);
             string outPath = Path.GetDirectoryName(path) + @"\..\Results";
@@ -72,19 +96,9 @@ namespace GraphTools
             // Load graph and labels
             var graph = GraphLoader.LoadGraphML(path, int.Parse, int.Parse);
 
-            //*
+            /*
             var partitioner = new GraphPartitioner<int, int>(graph);
             var distributedPartitioner = new DistributedGraphPartitioner<int, int>(1, graph);
-            //*/
-            
-            /*
-            Console.WriteLine("Go seq " + DateTime.Now);
-            partitioner.ExactBisimulationReduction();
-            Console.WriteLine("End seq " + DateTime.Now);
-            Console.WriteLine("Go dis " + DateTime.Now);
-            distributedPartitioner.ExactBisimulationReduction();
-            Console.WriteLine("End dis " + DateTime.Now);
-            Console.ReadLine();
             //*/
 
             /*
@@ -96,18 +110,6 @@ namespace GraphTools
             // GraphConverter.SaveToGraphML(estim, Path.GetDirectoryName(path) + @"\" + graph.Name + "_estim.xml");
             // GraphConverter.SaveToGraphML(exact, Path.GetDirectoryName(path) + @"\" + graph.Name + "_exact.xml");
             // GraphConverter.SaveToGraphML(coarse, Path.GetDirectoryName(path) + @"\" + graph.Name + "_coarse.xml");
-            //*/
-
-            /*
-            var k_max = partitioner.MultilevelExactBisimulationReduction().Count - 1;
-            var metrics = GraphMetrics.BisimulationEquivalence(estim, exact, k_max);
-
-            if (!(metrics.Item1 == metrics.Item2 && metrics.Item2 == metrics.Item3 && estim.NumNodes == exact.NumNodes && estim.NumEdges == exact.NumEdges))
-            {
-                Console.WriteLine("Nope");
-                Console.ReadLine();
-            }
-            return;
             //*/
 
             // Samplers
@@ -203,40 +205,6 @@ namespace GraphTools
             var experiment = Experiments.DistanceProbabilityMassFunction(graph);
             Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
             experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
-            //*/
-
-            //*
-            int M = Input("Maximum number of machines?", int.Parse);
-            int algorithm = Select("Algorithm?", new string[] { "Exact (explore)", "Estimate (explore)", "Exact (random)", "Explore (random)", "All of the above" });
-            Experiment[] experiments = null;
-            switch (algorithm)
-            {
-                case 0:
-                    experiments = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.ExploreSplit, "Explore");
-                    break;
-                case 1:
-                    experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.ExploreSplit, "Explore");
-                    break;
-                case 2:
-                    experiments = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.RandomSplit, "Random");
-                    break;
-                case 3:
-                    experiments = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.RandomSplit, "Random");
-                    break;
-                case 4:
-                    var exps1 = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.ExploreSplit, "Explore");
-                    var exps2 = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.ExploreSplit, "Explore");
-                    var exps3 = Experiments.MeasureDistributedPerformanceExact(graph, M, DistributedUtils.RandomSplit, "Random");
-                    var exps4 = Experiments.MeasureDistributedPerformanceEstimate(graph, M, DistributedUtils.RandomSplit, "Random");
-                    experiments = exps1.Concat(exps2).Concat(exps3).Concat(exps4).ToArray();
-                    break;
-            }
-            
-            foreach (var experiment in experiments)
-            {
-                Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0, double.NaN));
-                experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
-            }
             //*/
 
             /* Run bisimulation experiment
