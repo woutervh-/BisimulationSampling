@@ -106,12 +106,13 @@ namespace GraphTools.Distributed
             coordinator.SendMe(new CoordinatorMessage(null, workers));
 
             // Create tasks
-            var tasks = new Task[m + 1];
-            for (int i = 0; i < m; i++)
+            int r = workers.Length;
+            var tasks = new Task[r + 1];
+            for (int i = 0; i < r; i++)
             {
                 tasks[i] = new Task(workers[i].Run);
             }
-            tasks[m] = new Task(coordinator.Run);
+            tasks[r] = new Task(coordinator.Run);
 
             stopwatch.Reset();
             stopwatch.Start();
@@ -162,12 +163,13 @@ namespace GraphTools.Distributed
             coordinator.SendMe(new CoordinatorMessage(null, workers));
 
             // Create tasks
-            var tasks = new Task[m + 1];
-            for (int i = 0; i < m; i++)
+            int r = workers.Length;
+            var tasks = new Task[r + 1];
+            for (int i = 0; i < r; i++)
             {
                 tasks[i] = new Task(workers[i].Run);
             }
-            tasks[m] = new Task(coordinator.Run);
+            tasks[r] = new Task(coordinator.Run);
 
             stopwatch.Reset();
             stopwatch.Start();
