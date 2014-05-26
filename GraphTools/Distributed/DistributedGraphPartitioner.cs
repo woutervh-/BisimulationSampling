@@ -131,8 +131,8 @@ namespace GraphTools.Distributed
             }
             stopwatch.Stop();
 
-            visitTimes = workers.Sum(worker => worker.VisitTimes);
-            dataShipment = workers.Sum(worker => worker.DataShipment);
+            visitTimes = workers.Sum(worker => worker.VisitTimes) + coordinator.VisitTimes;
+            dataShipment = workers.Sum(worker => worker.DataShipment) + coordinator.DataShipment;
 
             return distributedPartition;
         }
@@ -188,8 +188,8 @@ namespace GraphTools.Distributed
             }
             stopwatch.Stop();
 
-            visitTimes = workers.Sum(worker => worker.VisitTimes);
-            dataShipment = workers.Sum(worker => worker.DataShipment);
+            visitTimes = workers.Sum(worker => worker.VisitTimes) + coordinator.VisitTimes;
+            dataShipment = workers.Sum(worker => worker.DataShipment) + coordinator.DataShipment;
 
             return distributedPartition;
         }
