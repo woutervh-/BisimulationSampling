@@ -27,7 +27,7 @@ namespace GraphTools
             int M = Input("Maximum number of machines?", int.Parse);
             int algorithm = Select("Algorithm?", new string[] { "Exact (explore)", "Estimate (explore)", "Exact (random)", "Estimate (random)", "All of the above" });
 
-            string outPath = Path.GetDirectoryName(path) + @"\Dummy";
+            string outPath = Path.GetDirectoryName(path) + @"\Performance";
             if (!Directory.Exists(outPath))
             {
                 Directory.CreateDirectory(outPath);
