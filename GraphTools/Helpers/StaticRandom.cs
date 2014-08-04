@@ -3,12 +3,12 @@
 namespace GraphTools.Helpers
 {
     /// <summary>
-    /// A thread-safe static variant of the Random class.
+    /// A static variant of the Random class.
     /// </summary>
     static class StaticRandom
     {
         private static Random random = new Random();
-        private static object @lock = new object();
+        // private static object @lock = new object();
 
         /// <summary>
         /// Returns a nonnegative random number.
@@ -16,7 +16,7 @@ namespace GraphTools.Helpers
         /// <returns></returns>
         public static int Next()
         {
-            lock (@lock)
+            // lock (@lock)
             {
                 return random.Next();
             }
@@ -28,7 +28,7 @@ namespace GraphTools.Helpers
         /// <returns></returns>
         public static double NextDouble()
         {
-            lock (@lock)
+            // lock (@lock)
             {
                 return random.NextDouble();
             }
@@ -41,7 +41,7 @@ namespace GraphTools.Helpers
         /// <returns></returns>
         public static int Next(int maxValue)
         {
-            lock (@lock)
+            // lock (@lock)
             {
                 return random.Next(maxValue);
             }
@@ -55,7 +55,7 @@ namespace GraphTools.Helpers
         /// <returns></returns>
         public static int Next(int minValue, int maxValue)
         {
-            lock (@lock)
+            // lock (@lock)
             {
                 return random.Next(minValue, maxValue);
             }

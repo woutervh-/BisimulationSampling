@@ -79,7 +79,7 @@ namespace GraphTools
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            //*
+            /*
             AllPerformanceExperiments();
             return;
             //*/
@@ -118,22 +118,24 @@ namespace GraphTools
                 //* Normal samplers
                 p => graph.Induce(graph.RN((int)(p * graph.NumNodes))),
                 p => graph.Induce(graph.RE((int)(p * graph.NumEdges))),
-                p => graph.Induce(graph.LowDegreeFirst((int)(p * graph.NumNodes))),
-                p => graph.Induce(graph.GreedyLabels((int)(p * graph.NumNodes))),
+                // p => graph.Induce(graph.LowDegreeFirst((int)(p * graph.NumNodes))),
+                // p => graph.Induce(graph.GreedyLabels((int)(p * graph.NumNodes))),
                 p => graph.Induce(graph.DistinctLabelsSB((int)(p * graph.NumNodes))),
                 p => graph.Induce(graph.QueuedSampler<int, int, FifoQueue<int>>((int)(p * graph.NumNodes))),
-                p => graph.Induce(graph.QueuedSampler<int, int, LifoQueue<int>>((int)(p * graph.NumNodes))),
-                p => graph.Induce(graph.QueuedSampler<int, int, AiroQueue<int>>((int)(p * graph.NumNodes))),
+                // p => graph.Induce(graph.QueuedSampler<int, int, LifoQueue<int>>((int)(p * graph.NumNodes))),
+                // p => graph.Induce(graph.QueuedSampler<int, int, AiroQueue<int>>((int)(p * graph.NumNodes))),
+                p => graph.Induce(graph.RandomWalkTeleport((int)(p * graph.NumNodes), 0.1)),
                 //*/
                 /* Approximation samplers
                 p => estim.Induce(estim.RN((int)(p * graph.NumNodes))),
                 p => estim.Induce(estim.RE((int)(p * graph.NumEdges))),
-                p => estim.Induce(estim.LowDegreeFirst((int)(p * graph.NumNodes))),
-                p => estim.Induce(estim.GreedyLabels((int)(p * graph.NumNodes))),
+                // p => estim.Induce(estim.LowDegreeFirst((int)(p * graph.NumNodes))),
+                // p => estim.Induce(estim.GreedyLabels((int)(p * graph.NumNodes))),
                 p => estim.Induce(estim.DistinctLabelsSB((int)(p * graph.NumNodes))),
                 p => estim.Induce(estim.QueuedSampler<int, int, FifoQueue<int>>((int)(p * graph.NumNodes))),
-                p => estim.Induce(estim.QueuedSampler<int, int, LifoQueue<int>>((int)(p * graph.NumNodes))),
-                p => estim.Induce(estim.QueuedSampler<int, int, AiroQueue<int>>((int)(p * graph.NumNodes))),
+                // p => estim.Induce(estim.QueuedSampler<int, int, LifoQueue<int>>((int)(p * graph.NumNodes))),
+                // p => estim.Induce(estim.QueuedSampler<int, int, AiroQueue<int>>((int)(p * graph.NumNodes))),
+                p => estim.Induce(estim.RandomWalkTeleport((int)(p * graph.NumNodes), 0.1)),
                 //*/
             };
 
@@ -142,31 +144,34 @@ namespace GraphTools
             {
                 "RN",
                 "RE",
-                "LDF",
-                "GL",
+                // "LDF",
+                // "GL",
                 "DLSB",
                 "BFS",
-                "DFS",
-                "RFS",
+                // "DFS",
+                // "RFS",
+                "RWT",
             };
             //*/
 
-            /* Run many bisimulation experiments in batch
-            var k_max = GraphPartitioner.MultilevelBisimulationReduction(graph).Count - 1;
-            // for (int k = 0; k <= k_max; k++)
+            //* Run many bisimulation experiments in batch
+            var partitioner = new GraphPartitioner<int, int>(graph);
+            var k_max = partitioner.MultilevelExactBisimulationReduction().Count - 1;
+            for (int k = 0; k <= k_max; k++)
             {
-                Parallel.For(0, samplers.Length, ParallelOptions, i =>
+                for (int i = 0; i < samplers.Length; i++)
                 {
                     var sampler = samplers[i];
                     var samplerName = samplerNames[i];
 
-                    // var experiment = Experiments.StandardBisimulationMetrics(graph, samplerName, sampler, k);
-                    // Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0.0, 1.0));
-                    // experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
-                    var experiment = Experiments.WeightedBisimulationMetrics(graph, samplerName, sampler, k_max);
-                    Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.svg", experiment.Plot(0.0, 1.0));
-                    experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.tsv");
-                });
+                    var experiment = Experiments.StandardBisimulationMetrics(graph, samplerName, sampler, k);
+                    Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0.0, 1.0));
+                    experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
+
+                    // var experiment = Experiments.WeightedBisimulationMetrics(graph, samplerName, sampler, k);
+                    // Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.svg", experiment.Plot(0.0, 1.0));
+                    // experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.tsv");
+                };
             }
             //*/
 

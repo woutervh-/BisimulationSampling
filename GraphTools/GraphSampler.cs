@@ -196,9 +196,9 @@ namespace GraphTools
                     n -= 1;
                 }
 
-                // Possible improvement: select by (edge label, target node label)
+                // Select by edge label, and target node label
                 var u = Q.Dequeue();
-                var N = graph.Out(u).GroupBy(eo => graph.EdgeLabel(eo)).Select(group => graph.Target(group.First()));
+                var N = graph.Out(u).GroupBy(eo => Tuple.Create(graph.EdgeLabel(eo), graph.NodeLabel(graph.Target(eo)))).Select(group => graph.Target(group.First()));
                 foreach (var v in N)
                 {
                     if (!V.Contains(v) && n > 0)
@@ -207,6 +207,49 @@ namespace GraphTools
                         V.Add(v);
                         n -= 1;
                     }
+                }
+            }
+
+            return V;
+        }
+
+        /// <summary>
+        /// Sample using a random walk with teleport technique.
+        /// </summary>
+        /// <typeparam name="TNode"></typeparam>
+        /// <typeparam name="TLabel"></typeparam>
+        /// <param name="graph"></param>
+        /// <param name="n">Upper bound on the number of nodes to sample.</param>
+        /// <param name="p">Probability to teleport to a random node after visiting a node.</param>
+        /// <returns></returns>
+        public static HashSet<TNode> RandomWalkTeleport<TNode, TLabel>(this MultiDirectedGraph<TNode, TLabel> graph, int n, double p)
+        {
+            var V = new HashSet<TNode>();
+            var nodes = graph.Nodes.ToArray();
+            n = Math.Min(n, graph.NumNodes);
+
+            // Initial teleport
+            var v = nodes[StaticRandom.Next(nodes.Length)];
+
+            while (n > 0)
+            {
+                if (!V.Contains(v))
+                {
+                    V.Add(v);
+                    n -= 1;
+                }
+
+                double t = StaticRandom.NextDouble();
+                var outNeighbors = graph.Out(v).Select(eo => graph.Target(eo)).ToArray();
+
+                if (t < p || outNeighbors.Length <= 0)
+                {
+                    // Teleport
+                    v = nodes[StaticRandom.Next(nodes.Length)];
+                }
+                else
+                {
+                    v = outNeighbors[StaticRandom.Next(outNeighbors.Length)];
                 }
             }
 
