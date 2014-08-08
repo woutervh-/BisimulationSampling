@@ -30,7 +30,11 @@ namespace GraphTools
                 }
             });
 
-            double count = distribution.Values.Sum();
+            double count = 0.0;
+            foreach (var value in distribution.Values)
+            {
+                count += value;
+            }
 
             Experiment experiment = new Experiment(2)
             {

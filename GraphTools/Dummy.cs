@@ -1,5 +1,4 @@
-﻿/*
-using GraphTools.Graph;
+﻿using GraphTools.Graph;
 using GraphTools.Plot;
 using OxyPlot;
 using OxyPlot.Axes;
@@ -8,62 +7,94 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using VDS.RDF;
-using VDS.RDF.Parsing;
 
 namespace GraphTools
 {
     static class Dummy
     {
-        /// <summary>
-        /// Read RDF/XML graph file and convert to an edge-labeled GraphML file.
-        /// </summary>
         public static void Foo()
         {
-            var mapping = new Dictionary<INode, int>();
+            // Process log generator petrinet dot conversion
+
             var inPath = Program.Input("In path?", string.Copy);
             var outPath = Program.Input("Out path?", string.Copy);
-
-            IGraph g = new VDS.RDF.Graph();
-            RdfXmlParser parser = new RdfXmlParser();
-            parser.Load(g, inPath);
-
-            int counter = 0;
             var graph = new MultiDirectedGraph<int, int>();
-            foreach (var triple in g.Triples)
+
+            var nodeMap = new Dictionary<string, int>();
+            int counter = 0;
+
+            var lines = File.ReadAllLines(inPath);
+            foreach (var line in lines)
             {
-                if (!mapping.ContainsKey(triple.Subject))
+                var tokens = line.Split(new char[] { ' ', '\t', '[', ']' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (tokens.Length <= 1)
                 {
-                    mapping.Add(triple.Subject, counter++);
+                    continue;
                 }
 
-                if (!mapping.ContainsKey(triple.Predicate))
+                if (tokens[0][0] == 't')
                 {
-                    mapping.Add(triple.Predicate, counter++);
+                    if (!nodeMap.ContainsKey(tokens[0]))
+                    {
+                        nodeMap.Add(tokens[0], counter++);
+                        graph.AddNode(nodeMap[tokens[0]], 0);
+                    }
                 }
 
-                if (!mapping.ContainsKey(triple.Object))
+                if (tokens[0][0] == 'p')
                 {
-                    mapping.Add(triple.Object, counter++);
+                    if (!nodeMap.ContainsKey(tokens[0]))
+                    {
+                        nodeMap.Add(tokens[0], counter++);
+                        graph.AddNode(nodeMap[tokens[0]], 1);
+                    }
                 }
 
-                int subjectId = mapping[triple.Subject];
-                int predicateId = mapping[triple.Predicate];
-                int objectId = mapping[triple.Object];
-
-                if (!graph.HasNode(subjectId))
+                if (tokens[1] == "->")
                 {
-                    graph.AddNode(subjectId, 0);
+                    var u = nodeMap[tokens[0]];
+                    var v = nodeMap[tokens[2]];
+
+                    graph.AddEdge(u, v);
                 }
+            }
 
-                if (!graph.HasNode(objectId))
-                {
-                    graph.AddNode(objectId, 0);
-                }
+            GraphConverter.SaveToGraphML(graph, outPath);
+        }
 
-                if (!graph.HasEdge(subjectId, objectId))
+        public static void Bar()
+        {
+            // Stanford graphs conversion
+
+            var inPath = Program.Input("In path?", string.Copy);
+            var outPath = Program.Input("Out path?", string.Copy);
+            var graph = new MultiDirectedGraph<int, int>();
+
+            var lines = File.ReadAllLines(inPath);
+            foreach (var line in lines)
+            {
+                var tokens = line.Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (tokens[0] != "#")
                 {
-                    graph.AddEdge(subjectId, objectId, predicateId);
+                    int source = int.Parse(tokens[0]);
+                    int target = int.Parse(tokens[1]);
+
+                    if (!graph.HasNode(source))
+                    {
+                        graph.AddNode(source);
+                    }
+
+                    if (!graph.HasNode(target))
+                    {
+                        graph.AddNode(target);
+                    }
+
+                    if (!graph.HasEdge(source, target))
+                    {
+                        graph.AddEdge(source, target);
+                    }
                 }
             }
 
@@ -71,4 +102,3 @@ namespace GraphTools
         }
     }
 }
-//*/

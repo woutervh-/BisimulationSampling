@@ -21,7 +21,7 @@ namespace GraphTools
         /// <summary>
         /// Run all performance experiments sequentially.
         /// </summary>
-        public static void AllPerformanceExperiments()
+        public static void AllPerformanceExperiments(string filter = "*")
         {
             string path = Input("Please enter the path to folder with graph files", string.Copy);
             int M = Input("Maximum number of machines?", int.Parse);
@@ -33,7 +33,7 @@ namespace GraphTools
                 Directory.CreateDirectory(outPath);
             }
 
-            string[] filePaths = Directory.GetFiles(path, "*.xml");
+            string[] filePaths = Directory.GetFiles(path, filter + ".xml");
             foreach (var filePath in filePaths)
             {
                 var graph = GraphLoader.LoadGraphML(filePath, int.Parse, int.Parse);
@@ -74,18 +74,55 @@ namespace GraphTools
         }
 
         /// <summary>
+        /// Run all analytics experiments.
+        /// </summary>
+        public static void AllAnalyticsExperiments(string filter = "*")
+        {
+            string path = Input("Please enter the path to folder with graph files", string.Copy);
+            string[] filePaths = Directory.GetFiles(path, filter + ".xml");
+
+            string outPath = Path.GetDirectoryName(path) + @"\Analytics";
+            if (!Directory.Exists(outPath))
+            {
+                Directory.CreateDirectory(outPath);
+            }
+
+            foreach (var filePath in filePaths)
+            {
+                var graph = GraphLoader.LoadGraphML(filePath, int.Parse, int.Parse);
+
+                var exp1 = Experiments.DistanceProbabilityMassFunction(graph);
+                Experiment.SaveSVG(outPath + @"\" + string.Join("_", exp1.Meta) + ".svg", exp1.Plot(0, double.NaN));
+                exp1.SaveTSV(outPath + @"\" + string.Join("_", exp1.Meta) + ".tsv");
+
+                var exp2 = Experiments.BisimulationPartitionSize(graph);
+                Experiment.SaveSVG(outPath + @"\" + string.Join("_", exp2.Meta) + ".svg", exp2.Plot(0, double.NaN));
+                exp2.SaveTSV(outPath + @"\" + string.Join("_", exp2.Meta) + ".tsv");
+
+                var exp3 = Experiments.PartitionBlockDistribution(graph);
+                Experiment.SaveSVG(outPath + @"\" + string.Join("_", exp3.Meta) + ".svg", exp3.Plot(0, double.NaN));
+                exp3.SaveTSV(outPath + @"\" + string.Join("_", exp3.Meta) + ".tsv");
+            }
+        }
+
+        /// <summary>
         /// Entry point.
         /// </summary>
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
             /*
+            Dummy.Foo();
+            return;
+            //*/
+
+            /*
             AllPerformanceExperiments();
             return;
             //*/
 
-            /* Using the generator
-            UseGenerator();
+            /*
+            AllAnalyticsExperiments("Petrinet*");
             return;
             //*/
 
