@@ -3,6 +3,7 @@ using GraphTools.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Threading.Tasks;
 
 namespace GraphTools
@@ -17,7 +18,7 @@ namespace GraphTools
         /// <returns></returns>
         public static Experiment DistanceProbabilityMassFunction<TNode, TLabel>(MultiDirectedGraph<TNode, TLabel> graph)
         {
-            var distribution = new Dictionary<int, int>();
+            var distribution = new Dictionary<int, BigInteger>();
             object @lock = new object();
 
             Parallel.ForEach(graph.Nodes, node =>
@@ -33,7 +34,7 @@ namespace GraphTools
             double count = 0.0;
             foreach (var value in distribution.Values)
             {
-                count += value;
+                count += (double)value;
             }
 
             Experiment experiment = new Experiment(2)
@@ -46,7 +47,7 @@ namespace GraphTools
 
                     if (distribution.ContainsKey(distance))
                     {
-                        return new double[] { d, distribution[distance] / count };
+                        return new double[] { d, (double)distribution[distance] / count };
                     }
                     else
                     {

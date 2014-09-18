@@ -65,6 +65,34 @@ namespace GraphTools.Graph
         }
 
         /// <summary>
+        /// Copies all ingoing and outgoing edges of each node to a single representative node.
+        /// </summary>
+        /// <param name="nodes">Nodes to merge. Make sure it is materialized after taking a collection from this instance.</param>
+        public void MergeNodes(IEnumerable<TNode> nodes)
+        {
+            // Pick a node to represent the nodes to be merged
+            var representative = nodes.First();
+
+            foreach (var node in nodes)
+            {
+                if (!node.Equals(representative))
+                {
+                    foreach (var eo in outgoing[node])
+                    {
+                        AddEdge(representative, target[eo], edgeLabel[eo]);
+                    }
+
+                    foreach (var ei in incoming[node])
+                    {
+                        AddEdge(source[ei], representative, edgeLabel[ei]);
+                    }
+
+                    RemoveNode(node);
+                }
+            }
+        }
+
+        /// <summary>
         /// Gets a boolean indicating whether this graph is directed or not.
         /// </summary>
         public bool IsDirected

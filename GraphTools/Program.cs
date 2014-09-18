@@ -112,7 +112,7 @@ namespace GraphTools
         public static void Main(string[] args)
         {
             /*
-            Dummy.Foo();
+            Dummy.Bar();
             return;
             //*/
 
@@ -122,7 +122,7 @@ namespace GraphTools
             //*/
 
             /*
-            AllAnalyticsExperiments("Petrinet*");
+            AllAnalyticsExperiments("WikiVote");
             return;
             //*/
 
@@ -208,6 +208,8 @@ namespace GraphTools
                     // var experiment = Experiments.WeightedBisimulationMetrics(graph, samplerName, sampler, k);
                     // Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.svg", experiment.Plot(0.0, 1.0));
                     // experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.tsv");
+
+                    Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss") + "] k=" + k + " sampler=" + samplerName);
                 };
             }
             //*/

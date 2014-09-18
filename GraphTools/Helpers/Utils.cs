@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 
 namespace GraphTools.Helpers
 {
@@ -120,6 +121,26 @@ namespace GraphTools.Helpers
         /// <param name="distribution"></param>
         /// <param name="sequence"></param>
         public static void UpdateDistribution<T>(Dictionary<T, int> distribution, IEnumerable<T> sequence)
+        {
+            foreach (var item in sequence)
+            {
+                if (!distribution.ContainsKey(item))
+                {
+                    distribution.Add(item, 0);
+                }
+
+                distribution[item] += 1;
+            }
+        }
+
+        /// <summary>
+        /// Updates a discrete distribution with a new sequence of items.
+        /// Key-value pairs indicate how often (value) the key occurs in the sequence + the distribution.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="distribution"></param>
+        /// <param name="sequence"></param>
+        public static void UpdateDistribution<T>(Dictionary<T, BigInteger> distribution, IEnumerable<T> sequence)
         {
             foreach (var item in sequence)
             {

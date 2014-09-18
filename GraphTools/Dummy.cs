@@ -12,6 +12,57 @@ namespace GraphTools
 {
     static class Dummy
     {
+        public static void Bla()
+        {
+            // Merge graphs in a folder with a single source node and sink node
+
+            string path = Program.Input("Please enter the path to folder with graph files", string.Copy);
+            var outPath = Program.Input("Out path?", string.Copy);
+
+            string[] filePaths = Directory.GetFiles(path, "*.xml");
+            var finalGraph = new MultiDirectedGraph<int, int>();
+            var finalSources = new List<int>();
+            var finalSinks = new List<int>();
+            int count = 0;
+
+            foreach (var filePath in filePaths)
+            {
+                var graph = GraphLoader.LoadGraphML(filePath, int.Parse, int.Parse);
+
+                foreach (var node in graph.Nodes)
+                {
+                    finalGraph.AddNode(node + count, graph.NodeLabel(node));
+                }
+
+                foreach (var edge in graph.Edges)
+                {
+                    var s = graph.Source(edge);
+                    var t = graph.Target(edge);
+                    var l = graph.EdgeLabel(edge);
+
+                    finalGraph.AddEdge(s + count, t + count, l);
+                }
+
+                var sources = graph.Nodes.Where(u => graph.In(u).Count() == 0);
+                var sinks = graph.Nodes.Where(u => graph.Out(u).Count() == 0);
+
+                if (sources.Count() != 1 || sinks.Count() != 1)
+                {
+                    throw new Exception();
+                }
+
+                finalSources.Add(sources.First() + count);
+                finalSinks.Add(sinks.First() + count);
+
+                count += graph.NumNodes;
+            }
+
+            finalGraph.MergeNodes(finalSources);
+            finalGraph.MergeNodes(finalSinks);
+
+            GraphConverter.SaveToGraphML(finalGraph, outPath);
+        }
+
         public static void Foo()
         {
             // Process log generator petrinet dot conversion
@@ -91,7 +142,7 @@ namespace GraphTools
                         graph.AddNode(target);
                     }
 
-                    if (!graph.HasEdge(source, target))
+                    if (!graph.HasEdge(source, target) && !graph.HasEdge(target, source))
                     {
                         graph.AddEdge(source, target);
                     }
