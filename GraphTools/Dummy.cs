@@ -12,6 +12,26 @@ namespace GraphTools
 {
     static class Dummy
     {
+        public static void Fix()
+        {
+            string path = Program.Input("Please enter the path to folder with graph files", string.Copy);
+            string[] tsvFiles = Directory.GetFiles(path, "*approx.tsv");
+
+            foreach (var filePath in tsvFiles)
+            {
+                var lines = File.ReadAllLines(filePath);
+                var meta = lines.Take(4).Select(line => line.Substring(2));
+
+                var fromSvg = filePath.Replace(".tsv", ".svg");
+                var fromTsv = filePath;
+                var toSvg = path + @"\" + string.Join("_", meta) + ".svg";
+                var toTsv = path + @"\" + string.Join("_", meta) + ".tsv";
+
+                File.Move(fromSvg, toSvg);
+                File.Move(fromTsv, toTsv);
+            }
+        }
+
         public static void Bla()
         {
             // Merge graphs in a folder with a single source node and sink node

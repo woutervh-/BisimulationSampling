@@ -111,8 +111,8 @@ namespace GraphTools
         /// <param name="args"></param>
         public static void Main(string[] args)
         {
-            /*
-            Dummy.Bar();
+            //*
+            Dummy.Fix();
             return;
             //*/
 
@@ -121,8 +121,8 @@ namespace GraphTools
             return;
             //*/
 
-            /*
-            AllAnalyticsExperiments("WikiVote");
+            //*
+            AllAnalyticsExperiments("Petrinet_no_labels");
             return;
             //*/
 
@@ -201,13 +201,13 @@ namespace GraphTools
                     var sampler = samplers[i];
                     var samplerName = samplerNames[i];
 
-                    var experiment = Experiments.StandardBisimulationMetrics(graph, samplerName, sampler, k);
+                    // var experiment = Experiments.StandardBisimulationMetrics(graph, samplerName, sampler, k);
+                    // Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0.0, 1.0));
+                    // experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
+
+                    var experiment = Experiments.WeightedBisimulationMetrics(graph, samplerName, sampler, k);
                     Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + ".svg", experiment.Plot(0.0, 1.0));
                     experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + ".tsv");
-
-                    // var experiment = Experiments.WeightedBisimulationMetrics(graph, samplerName, sampler, k);
-                    // Experiment.SaveSVG(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.svg", experiment.Plot(0.0, 1.0));
-                    // experiment.SaveTSV(outPath + @"\" + string.Join("_", experiment.Meta) + "_approx.tsv");
 
                     Console.WriteLine("[" + DateTime.Now.ToString("HH:mm:ss") + "] k=" + k + " sampler=" + samplerName);
                 };
@@ -222,23 +222,6 @@ namespace GraphTools
             PlotForm plotForm = new PlotForm();
             plotForm.Display(experiment.Plot(double.NaN, double.NaN));
             plotForm.ShowDialog();
-            //*/
-
-            /* Choose sampling method
-            string samplerName = null;
-            Func<double, IDirectedGraph<int>> sampler = null;
-            int method = Select("Please choose a sampling method", new string[]
-            {
-                "RN (Random node + induce subgraph)",
-                "RE (Random edge)",
-                "SB (Snowball + induce subgraph)",
-                "LDF (Low Degree First)",
-                "GL (Greedy Labels)",
-                "DLSB (Distinct Label Snowball)",
-                "KT (Kashtan)",
-            });
-            samplerName = samplerNames[method];
-            sampler = samplers[method];
             //*/
 
             /* Get k
